@@ -20,7 +20,7 @@ Diagram representing the overall system architecture, showing the main component
 
 ### 2. BPMN Diagram
 
-**File:** [Diagrama bpmn.drawio (1).png](./Workshop-2/Diagrama%20bpmn.drawio%20(1).png)
+**File:** [bpnm-diagrams.png](./Workshop-2/bpnm-diagrams.png)
 
 Business Process Model and Notation diagram that models the workflow and business processes of the UN Silicon Valley system.
 
@@ -28,7 +28,7 @@ Business Process Model and Notation diagram that models the workflow and busines
 
 ### 3. CRC Cards
 
-**File:** [CRC Un Sillicon Valley.drawio.png](./Workshop-2/CRC%20Un%20Sillicon%20Valley.drawio.png)
+**File:** [crc-un-sillicon-valley.png](./Workshop-2/crc-un-sillicon-valley.png)
 
 Class-Responsibility-Collaborator (CRC) cards describing the system's classes, their responsibilities, and the collaborations between them.
 
