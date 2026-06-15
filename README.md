@@ -47,3 +47,9 @@ Entity-Relationship (ER) diagram modeling the database structure of the system, 
 **File:** [uml-diagram.pdf](./Workshop-2/uml-diagram.pdf)
 
 UML diagram modeling the classes, relationships, inheritance, and associations of the UN Silicon Valley system.
+
+### 6. Mockups
+
+**File:** [Mockups.pdf](./Workshop-2/Mockups.pdf)
+
+Mockups detailing the visuals of the system
