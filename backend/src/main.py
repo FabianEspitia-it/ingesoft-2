@@ -1,29 +1,13 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-#from src.users.router import users_router
+import uvicorn
 
-
-app = FastAPI()
+from src.api.router import app
 
 app.title = "UN Silicon Valley API"
-app.description = "API for the UN Silicon Valley"
-app.version = "0.1.0"
+app.version = "1.0.0"
+app.description = "UN Silicon Valley API"
+app.contact = {
+    "name": "UN Silicon Valley Team",
+}
 
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-  "http://localhost:3000",
-],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["Content-Disposition"],
-)
-
-@app.get("/ping")
-async def ping():
-    return {"message": "pong"}
-
-
-#app.include_router(users_router, prefix="/users", tags=["Users"])
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=9999)
