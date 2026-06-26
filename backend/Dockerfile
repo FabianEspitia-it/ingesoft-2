@@ -40,9 +40,9 @@ WORKDIR /app
 COPY --from=builder /app/.venv /app/.venv
 
 # Copy app source (and alembic files if needed for migrations)
-COPY --from=builder --chown=appuser:appuser /app/src ./src
-COPY --from=builder --chown=appuser:appuser /app/alembic.ini /app/alembic.ini
-COPY --from=builder --chown=appuser:appuser /app/alembic ./alembic
+#COPY --from=builder --chown=appuser:appuser /app/src ./src
+#COPY --from=builder --chown=appuser:appuser /app/alembic.ini /app/alembic.ini
+#COPY --from=builder --chown=appuser:appuser /app/alembic ./alembic
 
 # Make venv executables available
 ENV PATH="/app/.venv/bin:$PATH"
