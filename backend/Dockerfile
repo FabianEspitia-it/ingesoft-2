@@ -39,10 +39,8 @@ WORKDIR /app
 # Copy virtualenv from builder
 COPY --from=builder /app/.venv /app/.venv
 
-# Copy app source (and alembic files if needed for migrations)
-#COPY --from=builder --chown=appuser:appuser /app/src ./src
-#COPY --from=builder --chown=appuser:appuser /app/alembic.ini /app/alembic.ini
-#COPY --from=builder --chown=appuser:appuser /app/alembic ./alembic
+# Copy app source
+COPY --from=builder --chown=appuser:appuser /app/src ./src
 
 # Make venv executables available
 ENV PATH="/app/.venv/bin:$PATH"
@@ -59,7 +57,7 @@ USER appuser
 
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:${PORT}/ping || exit 1
+    CMD curl -f http://localhost:${PORT}/health || exit 1
 
 # Start the API
 CMD ["sh", "-c", "uvicorn src.main:app --host 0.0.0.0 --port ${PORT}"]
