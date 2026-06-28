@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { memo, useMemo, useState, useTransition } from "react";
 
 import { register } from "@/lib/api";
+import { Icon, RiArrowRightLine } from "@/components/icons";
 import { AFFILIATION_LABELS, type UserAffiliation } from "@/lib/types/user";
 
 const AFFILIATIONS: UserAffiliation[] = ["student", "graduate", "professor"];
@@ -252,7 +253,7 @@ export function RegisterForm() {
           >
             <span className={`relative z-10 inline-flex items-center gap-2 ${isPending ? "opacity-80" : ""}`}>
               {isPending ? "Creando cuenta..." : "Crear cuenta"}
-              {!isPending ? <span aria-hidden="true">→</span> : null}
+              {!isPending ? <Icon icon={RiArrowRightLine} size={18} /> : null}
             </span>
             {isPending ? (
               <span className="absolute inset-0 overflow-hidden">

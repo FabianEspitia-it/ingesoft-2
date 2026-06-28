@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { getCurrentUser, logout } from "@/lib/api";
+import { Icon, RiArrowDownSLine, RiSearchLine } from "@/components/icons";
 import { Logo } from "@/components/layout/Logo";
 import type { User } from "@/lib/types/user";
 
@@ -24,34 +25,6 @@ function formatShortName(fullName: string): string {
   const first = parts[0];
   const lastInitial = parts[parts.length - 1][0]?.toUpperCase() ?? "";
   return `${first} ${lastInitial}.`;
-}
-
-function SearchIcon() {
-  return (
-    <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden="true">
-      <circle cx="9" cy="9" r="5.5" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M13.5 13.5 17 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function ChevronDownIcon({ open }: { open: boolean }) {
-  return (
-    <svg
-      viewBox="0 0 16 16"
-      className={`h-3.5 w-3.5 shrink-0 text-subtle transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="m4 6 4 4 4-4"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
 }
 
 export function Header({ variant = "default", activePath }: HeaderProps) {
@@ -146,7 +119,7 @@ export function Header({ variant = "default", activePath }: HeaderProps) {
             <label className="relative hidden w-52 xl:block xl:w-64">
               <span className="sr-only">Buscar entradas</span>
               <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-subtle">
-                <SearchIcon />
+                <Icon icon={RiSearchLine} size={16} />
               </span>
               <input
                 type="search"
@@ -187,7 +160,11 @@ export function Header({ variant = "default", activePath }: HeaderProps) {
                   <span className="hidden max-w-[7.5rem] truncate sm:inline">
                     {formatShortName(user.full_name)}
                   </span>
-                  <ChevronDownIcon open={menuOpen} />
+                  <Icon
+                    icon={RiArrowDownSLine}
+                    size={16}
+                    className={`shrink-0 text-subtle transition-transform duration-200 ${menuOpen ? "rotate-180" : ""}`}
+                  />
                 </button>
 
                 {menuOpen && (

@@ -7,7 +7,7 @@ Guía para implementar la interfaz con **tokens semánticos** definidos en CSS.
 1. **Nunca hardcodear colores ni fuentes en componentes.** Usar tokens (`--foreground`, `.ds-btn-primary`, `text-muted`, etc.).
 2. **Titulares en PT Serif; UI en Lato.** No referenciar fuentes por nombre en JSX.
 3. **Superficies en capas:** `background` → tarjetas con borde `border` sobre `surface`.
-4. **Iconografía lineal** con `currentColor` o `--foreground`.
+4. **Iconografía [Remix Icon](https://github.com/Remix-Design/RemixIcon)** — `@remixicon/react` vía `components/icons` (estilo `-line`).
 5. **Alto contraste editorial:** negro puro para acciones; `#111827` para texto de lectura.
 
 ---

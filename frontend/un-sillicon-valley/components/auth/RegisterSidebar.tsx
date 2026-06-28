@@ -1,29 +1,32 @@
+import type { RemixiconComponentType } from "@remixicon/react";
+
 import {
-  ChatIcon,
-  ProfileIcon,
-  TrophyIcon,
-  WriteIcon,
-} from "@/components/auth/register-icons";
+  Icon,
+  RiChat3Line,
+  RiQuillPenLine,
+  RiTrophyLine,
+  RiUserLine,
+} from "@/components/icons";
 import { Logo } from "@/components/layout/Logo";
 
-const features = [
+const features: { icon: RemixiconComponentType; text: string }[] = [
   {
-    icon: WriteIcon,
+    icon: RiQuillPenLine,
     text: "Publica entradas con texto enriquecido, imágenes y etiquetas.",
   },
   {
-    icon: ChatIcon,
+    icon: RiChat3Line,
     text: "Comenta y participa en discusiones técnicas.",
   },
   {
-    icon: TrophyIcon,
+    icon: RiTrophyLine,
     text: "Tu historia puede convertirse en caso de éxito.",
   },
   {
-    icon: ProfileIcon,
+    icon: RiUserLine,
     text: "Perfil público que muestra tu portafolio.",
   },
-] as const;
+];
 
 export function RegisterSidebar() {
   return (
@@ -40,20 +43,17 @@ export function RegisterSidebar() {
       </h2>
 
       <ul className="mt-6 space-y-3">
-        {features.map((feature) => {
-          const Icon = feature.icon;
-          return (
-            <li
-              key={feature.text}
-              className="flex gap-3 rounded-xl border border-border bg-background/25 p-3"
-            >
-              <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/15 text-foreground">
-                <Icon />
-              </span>
-              <span className="text-sm leading-snug text-muted">{feature.text}</span>
-            </li>
-          );
-        })}
+        {features.map((feature) => (
+          <li
+            key={feature.text}
+            className="flex gap-3 rounded-xl border border-border bg-background/25 p-3"
+          >
+            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/15 text-foreground">
+              <Icon icon={feature.icon} size={20} />
+            </span>
+            <span className="text-sm leading-snug text-muted">{feature.text}</span>
+          </li>
+        ))}
       </ul>
 
       <div className="mt-auto border-t border-dashed border-border pt-5">
