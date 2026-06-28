@@ -1,21 +1,24 @@
 import { EntryForm } from "@/components/entries/EntryForm";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 import { Header } from "@/components/layout/Header";
 
 export default function NewEntryPage() {
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen bg-background">
       <Header />
       <main className="mx-auto max-w-3xl px-6 py-10">
         <section className="mb-8">
-          <h1 className="text-3xl font-bold text-zinc-900">Crear una entrada</h1>
-          <p className="mt-2 text-zinc-600">
+          <h1 className="ds-headline text-3xl text-foreground">Crear una entrada</h1>
+          <p className="mt-2 text-muted">
             Publica contenido para la comunidad. Debes tener sesión iniciada.
           </p>
         </section>
 
-        <div className="rounded-3xl border border-zinc-200 bg-white p-8 shadow-sm">
-          <EntryForm />
-        </div>
+        <AuthGuard>
+          <div className="ds-card p-8">
+            <EntryForm />
+          </div>
+        </AuthGuard>
       </main>
     </div>
   );

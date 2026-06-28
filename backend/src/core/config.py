@@ -28,12 +28,20 @@ class Settings(BaseSettings):
             "http://localhost:3000",
         ]
     )
-    COOKIE_SECURE: bool = Field(default=True)
+    COOKIE_SECURE: bool = Field(default=False)
     COOKIE_SAMESITE: str = Field(default="lax")
 
     COOKIE_DOMAIN: str = Field(default="")
 
-    FRONTEND_URL: str = Field(default="")
+    FRONTEND_URL: str = Field(default="http://localhost:3000")
+
+    # JWT / Auth
+    JWT_SECRET: str = Field(default="change-me-in-production")
+    JWT_EXPIRATION_HOURS: int = Field(default=24)
+
+    # Email (Resend)
+    RESEND_KEY: str = Field(default="")
+    RESEND_FROM_EMAIL: str = Field(default="")
 
     # Google OAuth (from Firebase Console → Auth → Google provider)
     GOOGLE_CLIENT_ID: str = Field(default="")

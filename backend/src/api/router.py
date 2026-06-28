@@ -6,10 +6,11 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 
+import src.infrastructure.db.models  # noqa: F401
 from src.api.health import root_router
 from src.core.config import settings
 from src.infrastructure.db.database import close_db, init_db
-import src.infrastructure.db.models  # noqa: F401
+from src.modules.auth.router import auth_router
 from src.modules.entries.router import entries_router
 
 logger = logging.getLogger(__name__)
@@ -64,6 +65,7 @@ app.add_middleware(
 
 app.include_router(root_router, tags=["Root"])
 app.include_router(entries_router)
+app.include_router(auth_router)
 
 # --- Register new module routers below this line ---
 

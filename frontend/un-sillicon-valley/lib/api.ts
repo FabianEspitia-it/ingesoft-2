@@ -1,4 +1,10 @@
 import type { EntryCreatePayload, EntryDetail, EntryListResponse } from "@/lib/types/entry";
+import type {
+  LoginPayload,
+  MessageResponse,
+  RegisterPayload,
+  User,
+} from "@/lib/types/user";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:9999";
 
@@ -50,6 +56,41 @@ export function createEntry(payload: EntryCreatePayload): Promise<EntryDetail> {
   return apiFetch<EntryDetail>("/entries", {
     method: "POST",
     json: payload,
+  });
+}
+
+export function register(payload: RegisterPayload): Promise<MessageResponse> {
+  return apiFetch<MessageResponse>("/auth/register", {
+    method: "POST",
+    json: payload,
+  });
+}
+
+export function login(payload: LoginPayload): Promise<User> {
+  return apiFetch<User>("/auth/login", {
+    method: "POST",
+    json: payload,
+  });
+}
+
+export function logout(): Promise<MessageResponse> {
+  return apiFetch<MessageResponse>("/auth/logout", {
+    method: "POST",
+  });
+}
+
+export async function getCurrentUser(): Promise<User | null> {
+  try {
+    return await apiFetch<User>("/auth/me");
+  } catch {
+    return null;
+  }
+}
+
+export function verifyEmail(token: string): Promise<User> {
+  return apiFetch<User>("/auth/verify-email", {
+    method: "POST",
+    json: { token },
   });
 }
 

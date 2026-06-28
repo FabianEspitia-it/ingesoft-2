@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from src.infrastructure.db.database import get_db
-from src.infrastructure.db.models import Session, User
+from src.infrastructure.db.models import Session, User, UserRole
 
 
 async def get_current_user(
@@ -16,7 +16,7 @@ async def get_current_user(
     """
     Resolve the authenticated user from the session cookie.
 
-    Sergio's auth module will set this cookie on login; entries only consume it.
+    Validates active session, non-deleted user, and verified email (RN-2).
     """
     token = request.cookies.get("session")
     if not token:
@@ -42,4 +42,24 @@ async def get_current_user(
             detail="Sesión inválida o expirada.",
         )
 
+    if not session.user.email_verified:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Debes verificar tu correo institucional antes de continuar.",
+        )
+
     return session.user
+
+
+def require_role(*roles: UserRole):
+    """Dependency factory for role-based access control (RN-7, NFR-7)."""
+
+    async def _require_role(current_user: User = Depends(get_current_user)) -> User:
+        if current_user.role not in roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No tienes permisos para realizar esta acción.",
+            )
+        return current_user
+
+    return _require_role

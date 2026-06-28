@@ -1,0 +1,27 @@
+/**
+ * Sistema Ink — editorial monocromático.
+ * Tipografía: PT Serif (titulares) + Lato (cuerpo).
+ */
+:root {
+  --background: #ffffff;
+  --foreground: #111827;
+  --primary: #000000;
+  --primary-hover: #111827;
+  --on-primary: #ffffff;
+  --accent: #000000;
+  --on-accent: #ffffff;
+  --surface: #ffffff;
+  --border: #dbdee5;
+
+  --logo-mark: #000000;
+  --logo-bar: #ffffff;
+
+  --font-headline: var(--font-pt-serif);
+  --font-body: var(--font-lato);
+
+  --radius-card: 1rem;
+  --radius-control: 0.5rem;
+  --shadow-soft: 0 12px 28px -16px rgb(17 24 39 / 0.1);
+  --focus-ring: rgb(17 24 39 / 0.18);
+  --panel-grid-opacity: 0.05;
+}

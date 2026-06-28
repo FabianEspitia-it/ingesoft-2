@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Lato, PT_Serif } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const ptSerif = PT_Serif({
+  variable: "--font-pt-serif",
   subsets: ["latin"],
+  weight: ["400", "700"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const lato = Lato({
+  variable: "--font-lato",
   subsets: ["latin"],
+  weight: ["400", "700"],
 });
 
 export const metadata: Metadata = {
@@ -23,8 +25,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="es" className={`${ptSerif.variable} ${lato.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col bg-background text-foreground">{children}</body>
     </html>
   );
 }

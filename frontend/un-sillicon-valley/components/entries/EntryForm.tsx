@@ -29,14 +29,10 @@ export function EntryForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {error}
-        </div>
-      )}
+      {error && <div className="ds-alert ds-alert-error">{error}</div>}
 
       <div>
-        <label htmlFor="title" className="mb-2 block text-sm font-medium text-zinc-700">
+        <label htmlFor="title" className="ds-label">
           Título
         </label>
         <input
@@ -46,13 +42,13 @@ export function EntryForm() {
           required
           value={title}
           onChange={(event) => setTitle(event.target.value)}
-          className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-emerald-600"
+          className="auth-input auth-input-compact"
           placeholder="Escribe el título de tu entrada"
         />
       </div>
 
       <div>
-        <label htmlFor="body" className="mb-2 block text-sm font-medium text-zinc-700">
+        <label htmlFor="body" className="ds-label">
           Contenido
         </label>
         <textarea
@@ -62,7 +58,7 @@ export function EntryForm() {
           rows={12}
           value={body}
           onChange={(event) => setBody(event.target.value)}
-          className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-emerald-600"
+          className="auth-input auth-input-compact resize-y"
           placeholder="Escribe el contenido de tu entrada"
         />
       </div>
@@ -71,7 +67,7 @@ export function EntryForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-full bg-emerald-700 px-6 py-3 text-sm font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+          className="ds-btn ds-btn-primary ds-btn-pill"
         >
           {isSubmitting ? "Publicando..." : "Publicar entrada"}
         </button>
