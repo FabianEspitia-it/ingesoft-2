@@ -6,7 +6,7 @@ import type {
   User,
 } from "@/lib/types/user";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:9999";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://un-silicon-valley-236517281359.us-central1.run.app";
 
 type ApiOptions = RequestInit & {
   json?: unknown;
