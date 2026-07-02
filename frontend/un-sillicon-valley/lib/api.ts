@@ -1,3 +1,8 @@
+import type {
+  Comment,
+  CommentCreatePayload,
+  CommentListResponse,
+} from "@/lib/types/comment";
 import type { EntryCreatePayload, EntryDetail, EntryListResponse } from "@/lib/types/entry";
 import type {
   LoginPayload,
@@ -54,6 +59,24 @@ export function getEntry(id: number): Promise<EntryDetail> {
 
 export function createEntry(payload: EntryCreatePayload): Promise<EntryDetail> {
   return apiFetch<EntryDetail>("/entries", {
+    method: "POST",
+    json: payload,
+  });
+}
+
+export function getCategories(): Promise<string[]> {
+  return apiFetch<string[]>("/categories");
+}
+
+export function getComments(entryId: number): Promise<CommentListResponse> {
+  return apiFetch<CommentListResponse>(`/entries/${entryId}/comments`);
+}
+
+export function createComment(
+  entryId: number,
+  payload: CommentCreatePayload,
+): Promise<Comment> {
+  return apiFetch<Comment>(`/entries/${entryId}/comments`, {
     method: "POST",
     json: payload,
   });

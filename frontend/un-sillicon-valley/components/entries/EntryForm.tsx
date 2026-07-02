@@ -1,16 +1,40 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import { createEntry } from "@/lib/api";
+import { createEntry, getCategories } from "@/lib/api";
 
 export function EntryForm() {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    getCategories()
+      .then((categories) => {
+        if (!cancelled) setAvailableCategories(categories);
+      })
+      .catch(() => {
+        // Categories are optional; ignore load errors silently.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  function toggleCategory(category: string) {
+    setSelectedCategories((current) =>
+      current.includes(category)
+        ? current.filter((item) => item !== category)
+        : [...current, category],
+    );
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -18,7 +42,11 @@ export function EntryForm() {
     setIsSubmitting(true);
 
     try {
-      const entry = await createEntry({ title, body });
+      const entry = await createEntry({
+        title,
+        body,
+        category_names: selectedCategories,
+      });
       router.push(`/entries/${entry.id}`);
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "No se pudo crear la entrada.");
@@ -62,6 +90,31 @@ export function EntryForm() {
           placeholder="Escribe el contenido de tu entrada"
         />
       </div>
+
+      {availableCategories.length > 0 && (
+        <div>
+          <span className="ds-label">Categorías</span>
+          <p className="mb-2 text-sm text-subtle">Elige una o más (opcional).</p>
+          <div className="flex flex-wrap gap-2">
+            {availableCategories.map((category) => {
+              const selected = selectedCategories.includes(category);
+              return (
+                <button
+                  type="button"
+                  key={category}
+                  onClick={() => toggleCategory(category)}
+                  aria-pressed={selected}
+                  className={`ds-btn ds-btn-pill px-3 py-1.5 text-sm ${
+                    selected ? "ds-btn-primary" : "ds-btn-ghost"
+                  }`}
+                >
+                  {category}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="flex items-center gap-3">
         <button

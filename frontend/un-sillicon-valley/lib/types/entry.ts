@@ -10,6 +10,8 @@ export type EntrySummary = {
   published_at: string;
   view_count: number;
   author: AuthorSummary;
+  categories: string[];
+  tags: string[];
 };
 
 export type EntryDetail = EntrySummary & {
@@ -28,6 +30,8 @@ export type EntryListResponse = {
 export type EntryCreatePayload = {
   title: string;
   body: string;
+  category_names?: string[];
+  tags?: string[];
 };
 
 export const AFFILIATION_LABELS: Record<string, string> = {

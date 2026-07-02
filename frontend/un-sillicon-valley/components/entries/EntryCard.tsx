@@ -28,6 +28,19 @@ export function EntryCard({ entry }: EntryCardProps) {
         {" · "}
         {affiliation}
       </p>
+
+      {entry.categories.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {entry.categories.map((category) => (
+            <span
+              key={category}
+              className="inline-flex items-center rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-medium text-accent"
+            >
+              {category}
+            </span>
+          ))}
+        </div>
+      )}
     </article>
   );
 }

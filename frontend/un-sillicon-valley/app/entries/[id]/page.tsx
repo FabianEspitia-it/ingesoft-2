@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { CommentSection } from "@/components/comments/CommentSection";
 import { Header } from "@/components/layout/Header";
 import { getEntry } from "@/lib/api";
 import { AFFILIATION_LABELS, formatPublishedDate } from "@/lib/types/entry";
@@ -48,8 +49,28 @@ export default async function EntryDetailPage({ params }: EntryDetailPageProps) 
             {entry.body}
           </div>
 
+          {(entry.categories.length > 0 || entry.tags.length > 0) && (
+            <div className="mt-8 flex flex-wrap gap-2">
+              {entry.categories.map((category) => (
+                <span
+                  key={category}
+                  className="inline-flex items-center rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-medium text-accent"
+                >
+                  {category}
+                </span>
+              ))}
+              {entry.tags.map((tag) => (
+                <span key={tag} className="ds-badge">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
+
           <p className="mt-8 text-sm text-subtle">{entry.view_count} vistas</p>
         </article>
+
+        <CommentSection entryId={entry.id} />
       </main>
     </div>
   );

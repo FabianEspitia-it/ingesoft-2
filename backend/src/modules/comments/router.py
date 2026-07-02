@@ -1,0 +1,60 @@
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.api.dependencies import get_current_user
+from src.infrastructure.db.database import get_db
+from src.infrastructure.db.models import User
+from src.modules.comments import crud
+from src.modules.comments.schemas import (
+    CommentCreate,
+    CommentListResponse,
+    CommentResponse,
+)
+from src.modules.entries import crud as entries_crud
+
+comments_router = APIRouter(prefix="/entries/{entry_id}/comments", tags=["Comments"])
+
+
+async def _get_published_entry_or_404(db: AsyncSession, entry_id: int):
+    entry = await entries_crud.get_entry_by_id(db, entry_id)
+    if entry is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Entrada no encontrada.",
+        )
+    return entry
+
+
+@comments_router.get("", response_model=CommentListResponse)
+async def list_entry_comments(
+    entry_id: int,
+    db: AsyncSession = Depends(get_db),
+):
+    """US: List the comments of an entry, newest first."""
+    await _get_published_entry_or_404(db, entry_id)
+    comments, total = await crud.list_comments(db, entry_id)
+    return CommentListResponse(
+        items=[CommentResponse.model_validate(c) for c in comments],
+        total=total,
+    )
+
+
+@comments_router.post(
+    "",
+    response_model=CommentResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_entry_comment(
+    entry_id: int,
+    payload: CommentCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """US: Publish a comment on an entry (requires authenticated user)."""
+    await _get_published_entry_or_404(db, entry_id)
+    comment = await crud.create_comment(
+        db,
+        entry_id=entry_id,
+        author=current_user,
+        content=payload.content,
+    )
+    return CommentResponse.model_validate(comment)

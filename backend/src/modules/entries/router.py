@@ -25,7 +25,7 @@ async def list_entries(
     """US-1: List published entries ordered by date (RN-36)."""
     entries, total = await crud.list_entries(db, page=page, page_size=page_size)
     return EntryListResponse(
-        items=[EntrySummary.model_validate(entry) for entry in entries],
+        items=[EntrySummary.from_entry(entry) for entry in entries],
         total=total,
         page=page,
         page_size=page_size,
@@ -46,7 +46,7 @@ async def get_entry(
         )
 
     await crud.increment_view_count(db, entry)
-    return EntryDetail.model_validate(entry)
+    return EntryDetail.from_entry(entry)
 
 
 @entries_router.post(
@@ -61,4 +61,4 @@ async def create_entry(
 ):
     """US-9: Create a blog entry (RN-15, requires authenticated author)."""
     entry = await crud.create_entry(db, author=current_user, payload=payload)
-    return EntryDetail.model_validate(entry)
+    return EntryDetail.from_entry(entry)
