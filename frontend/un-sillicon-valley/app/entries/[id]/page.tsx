@@ -30,7 +30,7 @@ export default async function EntryDetailPage({ params }: EntryDetailPageProps) 
     <div className="min-h-screen bg-background">
       <Header />
       <main className="mx-auto max-w-3xl px-6 py-10">
-        <Link href="/" className="text-sm font-medium text-accent hover:underline">
+        <Link href="/" className="text-sm font-medium text-primary hover:underline">
           ← Volver al inicio
         </Link>
 

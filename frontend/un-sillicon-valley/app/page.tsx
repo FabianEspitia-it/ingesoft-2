@@ -17,9 +17,7 @@ export default async function HomePage() {
       <Header variant="marketing" activePath="/" />
       <main className="mx-auto max-w-5xl px-6 py-10">
         <section className="mb-10">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent">
-            Comunidad UNAL
-          </p>
+          <p className="ds-eyebrow">Comunidad UNAL</p>
           <h1 className="ds-headline mt-2 text-4xl sm:text-5xl">Blog UN Silicon Valley</h1>
           <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted">
             Emprendimiento, startups e ingeniería de software desde la comunidad UNAL.

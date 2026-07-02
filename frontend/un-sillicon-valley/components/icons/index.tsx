@@ -14,6 +14,7 @@ export {
   RiArrowDownSLine,
   RiArrowRightLine,
   RiChat3Line,
+  RiCloseLine,
   RiMailCheckLine,
   RiQuillPenLine,
   RiSearchLine,

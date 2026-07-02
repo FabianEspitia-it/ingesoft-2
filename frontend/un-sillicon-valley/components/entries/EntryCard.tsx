@@ -10,7 +10,7 @@ export function EntryCard({ entry }: EntryCardProps) {
   const affiliation = AFFILIATION_LABELS[entry.author.affiliation] ?? entry.author.affiliation;
 
   return (
-    <article className="ds-card group p-6 transition hover:border-accent/60">
+    <article className="ds-card group p-6 transition hover:border-primary/30">
       <div className="mb-3 flex items-center justify-between gap-4 text-sm text-subtle">
         <span>{formatPublishedDate(entry.published_at)}</span>
         <span>{entry.view_count} vistas</span>
@@ -18,7 +18,7 @@ export function EntryCard({ entry }: EntryCardProps) {
       <h2 className="ds-headline mb-2 text-2xl">
         <Link
           href={`/entries/${entry.id}`}
-          className="transition group-hover:text-accent"
+          className="transition group-hover:text-primary"
         >
           {entry.title}
         </Link>

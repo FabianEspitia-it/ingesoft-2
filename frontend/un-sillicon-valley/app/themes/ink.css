@@ -1,19 +1,22 @@
 /**
- * Sistema Ink — editorial monocromático.
- * Tipografía: PT Serif (titulares) + Lato (cuerpo).
+ * Sistema Ink — minimalista.
+ * Marca: blue-900 · Fondo: blanco · Panel: slate neutro (header + sidebar búsqueda).
  */
 :root {
   --background: #ffffff;
   --foreground: #111827;
-  --primary: #000000;
-  --primary-hover: #111827;
+  --primary: #1e3a8a;
+  --primary-hover: #172554;
   --on-primary: #ffffff;
-  --accent: #000000;
+  --accent: #1e3a8a;
   --on-accent: #ffffff;
   --surface: #ffffff;
-  --border: #dbdee5;
+  --border: #cbd5e1;
 
-  --logo-mark: #000000;
+  --header-bg: #f1f5f9;
+  --header-border: #cbd5e1;
+
+  --logo-mark: #1e3a8a;
   --logo-bar: #ffffff;
 
   --font-headline: var(--font-pt-serif);
@@ -21,7 +24,7 @@
 
   --radius-card: 1rem;
   --radius-control: 0.5rem;
-  --shadow-soft: 0 12px 28px -16px rgb(17 24 39 / 0.1);
-  --focus-ring: rgb(17 24 39 / 0.18);
-  --panel-grid-opacity: 0.05;
+  --shadow-soft: 0 12px 28px -16px rgb(30 58 138 / 0.1);
+  --focus-ring: rgb(30 58 138 / 0.18);
+  --panel-grid-opacity: 0.045;
 }
