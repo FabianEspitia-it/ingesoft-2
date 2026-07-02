@@ -12,6 +12,7 @@ import type { User } from "@/lib/types/user";
 type HeaderProps = {
   variant?: "default" | "marketing";
   activePath?: string;
+  disable?: boolean;
 };
 
 function getInitial(fullName: string): string {
@@ -27,13 +28,134 @@ function formatShortName(fullName: string): string {
   return `${first} ${lastInitial}.`;
 }
 
-export function Header({ variant = "default", activePath }: HeaderProps) {
+function AuthActionsSkeleton() {
+  return (
+    <>
+      <span
+        className="hidden h-10 w-[8.75rem] shrink-0 rounded-full bg-border/70 motion-reduce:animate-none sm:block"
+        aria-hidden="true"
+      />
+      <span
+        className="h-10 w-[6.75rem] shrink-0 rounded-full bg-border/70 motion-reduce:animate-none"
+        aria-hidden="true"
+      />
+    </>
+  );
+}
+
+function GuestAuthActions({
+  activePath,
+  variant,
+}: {
+  activePath?: string;
+  variant: "default" | "marketing";
+}) {
+  return (
+    <>
+      <Link
+        href="/login"
+        className={`ds-btn ds-btn-ghost ds-btn-pill shrink-0 px-4 py-2 text-sm ${
+          variant === "marketing" && activePath === "/login"
+            ? "border-foreground text-foreground"
+            : ""
+        }`}
+      >
+        Iniciar sesión
+      </Link>
+      <Link href="/register" className="ds-btn ds-btn-primary ds-btn-pill shrink-0 px-4 py-2 text-sm">
+        Registrarse
+      </Link>
+    </>
+  );
+}
+
+function UserAuthActions({
+  user,
+  menuOpen,
+  menuRef,
+  isLoggingOut,
+  onToggleMenu,
+  onLogout,
+  onCloseMenu,
+}: {
+  user: User;
+  menuOpen: boolean;
+  menuRef: React.RefObject<HTMLDivElement | null>;
+  isLoggingOut: boolean;
+  onToggleMenu: () => void;
+  onLogout: () => void;
+  onCloseMenu: () => void;
+}) {
+  return (
+    <>
+      <Link
+        href="/entries/new"
+        className="ds-btn ds-btn-primary ds-btn-pill header-create-btn shrink-0"
+      >
+        Crear entrada
+      </Link>
+
+      <div className="relative shrink-0" ref={menuRef}>
+        <button
+          type="button"
+          onClick={onToggleMenu}
+          className="header-user-trigger"
+          aria-expanded={menuOpen}
+          aria-haspopup="menu"
+        >
+          <span className="header-user-avatar" aria-hidden="true">
+            {getInitial(user.full_name)}
+          </span>
+          <span className="hidden max-w-[7.5rem] truncate sm:inline">
+            {formatShortName(user.full_name)}
+          </span>
+          <Icon
+            icon={RiArrowDownSLine}
+            size={16}
+            className={`shrink-0 text-subtle transition-transform duration-200 ${menuOpen ? "rotate-180" : ""}`}
+          />
+        </button>
+
+        {menuOpen && (
+          <div role="menu" className="header-menu">
+            <div className="header-menu-user">
+              <p className="truncate text-sm font-semibold text-foreground">{user.full_name}</p>
+              <p className="mt-0.5 truncate text-xs text-subtle">{user.email}</p>
+            </div>
+            <Link
+              href="/entries/new"
+              role="menuitem"
+              className="header-menu-item sm:hidden"
+              onClick={onCloseMenu}
+            >
+              Crear entrada
+            </Link>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={onLogout}
+              disabled={isLoggingOut}
+              className="header-menu-item"
+            >
+              {isLoggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
+            </button>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+export function Header({ variant = "default", activePath, disable = false }: HeaderProps) {
   const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [terms, setTerms] = useState("");
+
+  const isMarketing = variant === "marketing";
 
   useEffect(() => {
     let cancelled = false;
@@ -77,31 +199,40 @@ export function Header({ variant = "default", activePath }: HeaderProps) {
     }
   }
 
+  function handleSearchSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (disable || !terms.trim()) return;
+
+    const searchParams = new URLSearchParams();
+    searchParams.set("terms", terms.trim());
+
+    router.push(`/search?${searchParams.toString()}`);
+  }
+
   const navClass = (path: string) =>
-    `relative hidden text-sm font-medium transition md:inline ${
+    `relative text-sm font-medium transition md:inline ${
       activePath === path
-        ? "text-foreground after:absolute after:-bottom-2 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-foreground"
-        : "text-muted hover:text-foreground"
+        ? "text-primary after:absolute after:-bottom-2 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-primary"
+        : "text-muted hover:text-primary"
     }`;
 
-  const showMarketingLayout = variant === "marketing" || Boolean(user);
-  const containerClass = showMarketingLayout
-    ? "mx-auto flex max-w-7xl items-center gap-6 px-6 py-3.5"
-    : "mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3.5";
-
   return (
-    <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur-md">
-      <div className={containerClass}>
+    <header className="site-header sticky top-0 z-20">
+      <div className={`header-inner ${isMarketing ? "header-inner--marketing" : ""}`}>
         <Link
           href="/"
-          className="inline-flex shrink-0 items-center"
+          className="header-brand inline-flex shrink-0 items-center"
           aria-label="UN Silicon Valley — Inicio"
         >
-          <Logo showWordmark compactOnMobile={showMarketingLayout} size={showMarketingLayout ? "md" : "sm"} />
+          <Logo
+            showWordmark
+            compactOnMobile={isMarketing}
+            size={isMarketing ? "md" : "sm"}
+          />
         </Link>
 
-        {showMarketingLayout && (
-          <nav className="hidden flex-1 items-center justify-center gap-8 lg:flex">
+        {isMarketing ? (
+          <nav className="header-nav hidden items-center justify-center gap-8 lg:flex" aria-label="Principal">
             <Link href="/" className={navClass("/")}>
               Inicio
             </Link>
@@ -112,112 +243,66 @@ export function Header({ variant = "default", activePath }: HeaderProps) {
               Casos de éxito
             </Link>
           </nav>
+        ) : (
+          <div className="min-w-0 flex-1" aria-hidden="true" />
         )}
 
-        <div className={`header-actions ${showMarketingLayout ? "ml-auto shrink-0" : ""}`}>
-          {showMarketingLayout && (
-            <label className="relative hidden w-52 xl:block xl:w-64">
-              <span className="sr-only">Buscar entradas</span>
-              <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-subtle">
-                <Icon icon={RiSearchLine} size={16} />
-              </span>
-              <input
-                type="search"
-                placeholder="Buscar entradas..."
-                className="header-search"
-              />
-            </label>
+        <div className={`header-end ${isMarketing ? "" : "shrink-0"}`}>
+          {isMarketing && (
+            <form
+              onSubmit={handleSearchSubmit}
+              className={`header-search-slot hidden shrink-0 xl:block ${disable ? "pointer-events-none" : ""}`}
+            >
+              <label
+                className={`relative block w-52 xl:w-64 ${
+                  disable ? "header-search-wrapper--disabled" : ""
+                }`}
+              >
+                <span className="sr-only">Buscar entradas</span>
+                <span className="header-search-icon pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-subtle">
+                  <Icon icon={RiSearchLine} size={16} />
+                </span>
+                <input
+                  type="search"
+                  placeholder="Buscar entradas…"
+                  disabled={disable}
+                  aria-disabled={disable}
+                  title={disable ? "Desactivado durante búsqueda avanzada" : undefined}
+                  className="header-search"
+                  name="terms"
+                  value={terms}
+                  onChange={(event) => setTerms(event.target.value)}
+                />
+              </label>
+            </form>
           )}
 
-          {!showMarketingLayout && (
-            <Link href="/" className="text-sm font-medium text-muted transition hover:text-foreground">
+          {!isMarketing && (
+            <Link
+              href="/"
+              className="hidden shrink-0 text-sm font-medium text-muted transition hover:text-foreground md:inline"
+            >
               Inicio
             </Link>
           )}
 
-          {isLoading ? (
-            <span className="text-subtle text-sm">...</span>
-          ) : user ? (
-            <>
-              <Link
-                href="/entries/new"
-                className="ds-btn ds-btn-primary ds-btn-pill header-create-btn"
-              >
-                Crear entrada
-              </Link>
-
-              <div className="relative" ref={menuRef}>
-                <button
-                  type="button"
-                  onClick={() => setMenuOpen((open) => !open)}
-                  className="header-user-trigger"
-                  aria-expanded={menuOpen}
-                  aria-haspopup="menu"
-                >
-                  <span className="header-user-avatar" aria-hidden="true">
-                    {getInitial(user.full_name)}
-                  </span>
-                  <span className="hidden max-w-[7.5rem] truncate sm:inline">
-                    {formatShortName(user.full_name)}
-                  </span>
-                  <Icon
-                    icon={RiArrowDownSLine}
-                    size={16}
-                    className={`shrink-0 text-subtle transition-transform duration-200 ${menuOpen ? "rotate-180" : ""}`}
-                  />
-                </button>
-
-                {menuOpen && (
-                  <div role="menu" className="header-menu">
-                    <div className="header-menu-user">
-                      <p className="truncate text-sm font-semibold text-foreground">{user.full_name}</p>
-                      <p className="mt-0.5 truncate text-xs text-subtle">{user.email}</p>
-                    </div>
-                    <Link
-                      href="/entries/new"
-                      role="menuitem"
-                      className="header-menu-item sm:hidden"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      Crear entrada
-                    </Link>
-                    <button
-                      type="button"
-                      role="menuitem"
-                      onClick={handleLogout}
-                      disabled={isLoggingOut}
-                      className="header-menu-item"
-                    >
-                      {isLoggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
-                    </button>
-                  </div>
-                )}
-              </div>
-            </>
-          ) : variant === "marketing" ? (
-            <>
-              <Link
-                href="/login"
-                className={`ds-btn ds-btn-ghost ds-btn-pill px-4 py-2 text-sm ${
-                  activePath === "/login" ? "border-foreground text-foreground" : ""
-                }`}
-              >
-                Iniciar sesión
-              </Link>
-              <Link href="/register" className="ds-btn ds-btn-primary ds-btn-pill px-4 py-2 text-sm">
-                Registrarse
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link href="/login" className="ds-btn ds-btn-ghost ds-btn-pill px-4 py-2 text-sm">
-                Iniciar sesión
-              </Link>
-              <Link href="/register" className="ds-btn ds-btn-primary ds-btn-pill px-4 py-2 text-sm">
-                Registrarse
-              </Link>
-            </>
-          )}
+          <div className="header-auth-slot" aria-busy={isLoading}>
+            {isLoading ? (
+              <AuthActionsSkeleton />
+            ) : user ? (
+              <UserAuthActions
+                user={user}
+                menuOpen={menuOpen}
+                menuRef={menuRef}
+                isLoggingOut={isLoggingOut}
+                onToggleMenu={() => setMenuOpen((open) => !open)}
+                onLogout={handleLogout}
+                onCloseMenu={() => setMenuOpen(false)}
+              />
+            ) : (
+              <GuestAuthActions activePath={activePath} variant={variant} />
+            )}
+          </div>
         </div>
       </div>
     </header>

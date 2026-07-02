@@ -35,9 +35,7 @@ export function RegisterSidebar() {
         <Logo showWordmark={false} size="lg" />
       </div>
 
-      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent">
-        Comunidad UNAL
-      </p>
+      <p className="ds-eyebrow">Comunidad UNAL</p>
       <h2 className="ds-headline mt-2 max-w-sm text-2xl leading-tight text-foreground">
         Comparte lo que aprendes construyendo.
       </h2>
