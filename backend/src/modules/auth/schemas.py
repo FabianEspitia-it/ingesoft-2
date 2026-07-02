@@ -58,14 +58,15 @@ class VerifyEmailRequest(BaseModel):
 
 class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-
+    
     id: int
     email: str
     full_name: str
     affiliation: UserAffiliation
     role: UserRole
     email_verified: bool
-
+    biography: str | None
+    profile_picture: str | None
 
 class MessageResponse(BaseModel):
     message: str
