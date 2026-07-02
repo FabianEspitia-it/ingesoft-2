@@ -8,8 +8,15 @@ import type {
   LoginPayload,
   MessageResponse,
   RegisterPayload,
+  UpdateUserPayload,
   User,
 } from "@/lib/types/user";
+import type {
+  CreateProjectPayload,
+  UpdateProjectPayload,
+  ProjectListResponse,
+  Project,
+} from "@/lib/types/project"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://un-silicon-valley-236517281359.us-central1.run.app";
 
@@ -30,6 +37,10 @@ async function apiFetch<T>(path: string, options: ApiOptions = {}): Promise<T> {
     },
     body: json !== undefined ? JSON.stringify(json) : rest.body,
   });
+
+  if (response.status === 204) {
+  return undefined as T;
+  }
 
   if (!response.ok) {
     const errorBody = (await response.json().catch(() => null)) as {
@@ -118,6 +129,37 @@ export function verifyEmail(token: string): Promise<User> {
   return apiFetch<User>("/auth/verify-email", {
     method: "POST",
     json: { token },
+  });
+}
+
+export function updateUser(payload: UpdateUserPayload): Promise<User> {
+  return apiFetch<User>("/users/me", {
+    method: "PUT",
+    json: payload,
+  });
+}
+
+export function getMyProjects(userId: number): Promise<ProjectListResponse> {
+  return apiFetch<ProjectListResponse>(`/projects?user_id=${userId}&page_size=100`);
+}
+ 
+export function createProject(payload: CreateProjectPayload): Promise<Project> {
+  return apiFetch<Project>("/projects", {
+    method: "POST",
+    json: payload,
+  });
+}
+ 
+export function updateProject(id: number, payload: UpdateProjectPayload): Promise<Project> {
+  return apiFetch<Project>(`/projects/${id}`, {
+    method: "PUT",
+    json: payload,
+  });
+}
+ 
+export function deleteProject(id: number): Promise<void> {
+  return apiFetch<void>(`/projects/${id}`, {
+    method: "DELETE",
   });
 }
 
