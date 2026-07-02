@@ -52,6 +52,10 @@ export function getEntry(id: number): Promise<EntryDetail> {
   return apiFetch<EntryDetail>(`/entries/${id}`);
 }
 
+export function getSearch(terms: string): Promise<EntryListResponse> {
+  return apiFetch<EntryListResponse>(`/search?${terms}`);
+}
+
 export function createEntry(payload: EntryCreatePayload): Promise<EntryDetail> {
   return apiFetch<EntryDetail>("/entries", {
     method: "POST",

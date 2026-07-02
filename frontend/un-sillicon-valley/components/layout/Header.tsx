@@ -12,6 +12,7 @@ import type { User } from "@/lib/types/user";
 type HeaderProps = {
   variant?: "default" | "marketing";
   activePath?: string;
+  disable?: boolean;
 };
 
 function getInitial(fullName: string): string {
@@ -27,13 +28,14 @@ function formatShortName(fullName: string): string {
   return `${first} ${lastInitial}.`;
 }
 
-export function Header({ variant = "default", activePath }: HeaderProps) {
+export function Header({ variant = "default", activePath, disable = false }: HeaderProps) {
   const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [terms, setTerms] = useState("");  
 
   useEffect(() => {
     let cancelled = false;
@@ -77,6 +79,18 @@ export function Header({ variant = "default", activePath }: HeaderProps) {
     }
   }
 
+
+  function handleSearchSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!terms.trim()) return;
+
+    const searchParams = new URLSearchParams();
+    searchParams.set("terms", terms.trim());
+
+    router.push(`/search?${searchParams.toString()}`)
+    } 
+    
+
   const navClass = (path: string) =>
     `relative hidden text-sm font-medium transition md:inline ${
       activePath === path
@@ -114,8 +128,9 @@ export function Header({ variant = "default", activePath }: HeaderProps) {
           </nav>
         )}
 
-        <div className={`header-actions ${showMarketingLayout ? "ml-auto shrink-0" : ""}`}>
+        <div className={`header-actions ${showMarketingLayout ? "ml-auto shrink-0" : ""}`} >
           {showMarketingLayout && (
+            <form onSubmit={handleSearchSubmit}>
             <label className="relative hidden w-52 xl:block xl:w-64">
               <span className="sr-only">Buscar entradas</span>
               <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-subtle">
@@ -124,9 +139,14 @@ export function Header({ variant = "default", activePath }: HeaderProps) {
               <input
                 type="search"
                 placeholder="Buscar entradas..."
+                disabled={disable}
                 className="header-search"
+                name="terms"
+                value={terms}
+                onChange={(e) => setTerms(e.target.value)}
               />
             </label>
+            </form>
           )}
 
           {!showMarketingLayout && (

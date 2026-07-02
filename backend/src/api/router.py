@@ -12,6 +12,7 @@ from src.core.config import settings
 from src.infrastructure.db.database import close_db, init_db
 from src.modules.auth.router import auth_router
 from src.modules.entries.router import entries_router
+from src.modules.search.router import search_router
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +67,7 @@ app.add_middleware(
 app.include_router(root_router, tags=["Root"])
 app.include_router(entries_router)
 app.include_router(auth_router)
+app.include_router(search_router)
 
 # --- Register new module routers below this line ---
 
