@@ -8,6 +8,15 @@ export interface User {
   affiliation: UserAffiliation;
   role: UserRole;
   email_verified: boolean;
+  biography?: string;
+  profile_picture?: string | null;
+}
+
+export interface UpdateUserPayload {
+  full_name?: string;
+  affiliation?: UserAffiliation;
+  biography?: string;
+  profile_picture?: string;
 }
 
 export interface RegisterPayload {
