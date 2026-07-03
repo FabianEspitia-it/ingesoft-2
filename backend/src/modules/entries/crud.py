@@ -11,23 +11,24 @@ async def list_entries(
     *,
     page: int = 1,
     page_size: int = 20,
+    author_id: int | None = None,
 ) -> tuple[list[Entry], int]:
     offset = (page - 1) * page_size
-
-    base_filters = (
+    filters = [
         Entry.deleted_at.is_(None),
         Entry.status == EntryStatus.published,
-    )
+    ]
+    if author_id is not None:
+        filters.append(Entry.author_id == author_id)
 
     count_result = await db.execute(
-        select(func.count()).select_from(Entry).where(*base_filters)
+        select(func.count()).select_from(Entry).where(*filters)
     )
     total = count_result.scalar_one()
-
     result = await db.execute(
         select(Entry)
         .options(selectinload(Entry.author), selectinload(Entry.tags))
-        .where(*base_filters)
+        .where(*filters)
         .order_by(Entry.published_at.desc())
         .offset(offset)
         .limit(page_size)
@@ -108,7 +109,6 @@ async def create_entry(
         category_names=payload.category_names,
         free_tags=payload.tags,
     )
-
     entry = Entry(
         author_id=author.id,
         title=payload.title.strip(),
@@ -118,7 +118,6 @@ async def create_entry(
     entry.tags = tags
     db.add(entry)
     await db.flush()
-
     result = await db.execute(
         select(Entry)
         .options(selectinload(Entry.author), selectinload(Entry.tags))
