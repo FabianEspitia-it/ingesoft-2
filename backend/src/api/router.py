@@ -15,6 +15,8 @@ from src.modules.comments.router import comments_router
 from src.modules.entries.categories import categories_router
 from src.modules.entries.router import entries_router
 from src.modules.search.router import search_router
+from src.modules.users.router import users_router
+from src.modules.projects.router import projects_router
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +74,8 @@ app.include_router(comments_router)
 app.include_router(categories_router)
 app.include_router(auth_router)
 app.include_router(search_router)
+app.include_router(users_router)
+app.include_router(projects_router)
 
 # --- Register new module routers below this line ---
 
