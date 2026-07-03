@@ -94,6 +94,10 @@ export function createComment(
   });
 }
 
+export function getSearch(terms: string): Promise<EntryListResponse> {
+  return apiFetch<EntryListResponse>(`/search?${terms}`);
+}
+
 export function register(payload: RegisterPayload): Promise<MessageResponse> {
   return apiFetch<MessageResponse>("/auth/register", {
     method: "POST",
