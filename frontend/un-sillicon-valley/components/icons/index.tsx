@@ -20,4 +20,9 @@ export {
   RiSearchLine,
   RiTrophyLine,
   RiUserLine,
+  RiAddLine,
+  RiDeleteBinLine,
+  RiEditLine,
+  RiImage2Line,
+  RiImageLine
 } from "@remixicon/react";
