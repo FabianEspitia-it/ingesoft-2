@@ -11,3 +11,6 @@ credentials.json
 *.pem
 
 **/.pnpm-store
+
+# vscode
+.vscode

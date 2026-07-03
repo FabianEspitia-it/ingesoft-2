@@ -130,6 +130,14 @@ function UserAuthActions({
             >
               Crear entrada
             </Link>
+            <Link
+              href="/user/edit"
+              role="menuitem"
+              className="header-menu-item sm:hidden"
+              onClick={onCloseMenu}
+            >
+              Editar perfil
+            </Link>
             <button
               type="button"
               role="menuitem"

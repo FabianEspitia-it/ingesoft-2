@@ -1,6 +1,5 @@
 import enum
 from datetime import datetime
-from typing import List, Optional
 
 from sqlalchemy import (
     Boolean,
@@ -15,9 +14,7 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from src.infrastructure.db.database import Base
-
 
 # ============================================================================
 # Enumerations
@@ -83,22 +80,22 @@ class User(Base):
         default=False,
         comment="Must be verified before access (RN-2, NFR-4)",
     )
-    biography: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    profile_picture: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    biography: Mapped[str | None] = mapped_column(Text, nullable=True)
+    profile_picture: Mapped[str | None] = mapped_column(String(500), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
-    deleted_at: Mapped[Optional[datetime]] = mapped_column(
+    deleted_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True, comment="Soft-delete timestamp"
     )
 
     # Relationships
-    sessions: Mapped[List["Session"]] = relationship(back_populates="user")
-    external_links: Mapped[List["ExternalLink"]] = relationship(back_populates="user")
-    projects: Mapped[List["Project"]] = relationship(back_populates="user")
-    entries: Mapped[List["Entry"]] = relationship(back_populates="author")
-    comments: Mapped[List["Comment"]] = relationship(back_populates="author")
-    reactions: Mapped[List["Reaction"]] = relationship(back_populates="user")
+    sessions: Mapped[list["Session"]] = relationship(back_populates="user")
+    external_links: Mapped[list["ExternalLink"]] = relationship(back_populates="user")
+    projects: Mapped[list["Project"]] = relationship(back_populates="user")
+    entries: Mapped[list["Entry"]] = relationship(back_populates="author")
+    comments: Mapped[list["Comment"]] = relationship(back_populates="author")
+    reactions: Mapped[list["Reaction"]] = relationship(back_populates="user")
 
     __table_args__ = (
         UniqueConstraint("email", name="users_email_key"),
@@ -116,7 +113,7 @@ class ExternalLink(Base):
     user_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id"), nullable=False
     )
-    title: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    title: Mapped[str | None] = mapped_column(String(100), nullable=True)
     url: Mapped[str] = mapped_column(String(500), nullable=False)
 
     # Relationships
@@ -135,8 +132,8 @@ class Project(Base):
         Integer, ForeignKey("users.id"), nullable=False
     )
     title: Mapped[str] = mapped_column(String(200), nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    url: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
     # Relationships
     user: Mapped["User"] = relationship(back_populates="projects")
@@ -198,7 +195,7 @@ class Entry(Base):
         String(255), nullable=False, comment="Required (RN-15)"
     )
     body: Mapped[str] = mapped_column(Text, nullable=False, comment="Required (RN-15)")
-    cover_image: Mapped[Optional[str]] = mapped_column(
+    cover_image: Mapped[str | None] = mapped_column(
         String(500),
         nullable=True,
         comment="Optional, JPG/PNG <=5MB in Cloud Storage (RN-18, NFR-13)",
@@ -220,22 +217,22 @@ class Entry(Base):
     published_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
-    updated_at: Mapped[Optional[datetime]] = mapped_column(
+    updated_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
         comment="Shown if entry was edited (RN-19)",
     )
-    deleted_at: Mapped[Optional[datetime]] = mapped_column(
+    deleted_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True, comment="Soft-delete timestamp"
     )
 
     # Relationships
     author: Mapped["User"] = relationship(back_populates="entries")
-    tags: Mapped[List["Tag"]] = relationship(
+    tags: Mapped[list["Tag"]] = relationship(
         secondary="entry_tags", back_populates="entries"
     )
-    comments: Mapped[List["Comment"]] = relationship(back_populates="entry")
-    reactions: Mapped[List["Reaction"]] = relationship(back_populates="entry")
+    comments: Mapped[list["Comment"]] = relationship(back_populates="entry")
+    reactions: Mapped[list["Reaction"]] = relationship(back_populates="entry")
 
     __table_args__ = (
         Index("idx_entries_author_id", "author_id"),
@@ -259,7 +256,7 @@ class Tag(Base):
     name: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
 
     # Relationships
-    entries: Mapped[List["Entry"]] = relationship(
+    entries: Mapped[list["Entry"]] = relationship(
         secondary="entry_tags", back_populates="tags"
     )
 
@@ -306,7 +303,7 @@ class Comment(Base):
     published_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
-    edited_at: Mapped[Optional[datetime]] = mapped_column(
+    edited_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
 

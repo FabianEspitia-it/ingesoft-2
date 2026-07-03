@@ -12,7 +12,6 @@ from src.modules.entries.schemas import (
 )
 
 entries_router = APIRouter(prefix="/entries", tags=["Entries"])
-
 MAX_PAGE_SIZE = 20
 
 
@@ -20,10 +19,13 @@ MAX_PAGE_SIZE = 20
 async def list_entries(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=MAX_PAGE_SIZE),
+    author_id: int | None = Query(None),
     db: AsyncSession = Depends(get_db),
 ):
     """US-1: List published entries ordered by date (RN-36)."""
-    entries, total = await crud.list_entries(db, page=page, page_size=page_size)
+    entries, total = await crud.list_entries(
+        db, page=page, page_size=page_size, author_id=author_id
+    )
     return EntryListResponse(
         items=[EntrySummary.from_entry(entry) for entry in entries],
         total=total,
@@ -44,7 +46,6 @@ async def get_entry(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Entrada no encontrada.",
         )
-
     await crud.increment_view_count(db, entry)
     return EntryDetail.from_entry(entry)
 
