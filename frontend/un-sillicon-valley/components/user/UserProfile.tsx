@@ -1,91 +1,16 @@
 "use client";
 
-import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Icon, RiImage2Line, RiMailCheckLine, RiQuillPenLine } from "@/components/icons";
-import { AFFILIATION_LABELS, type UserAffiliation } from "@/lib/types/user";
-
-// ─── Tipos temporales (reemplazar con los reales cuando exista el back) ────────
-
-type Project = {
-  id: number;
-  title: string;
-  description: string;
-  url: string;
-  image_url?: string;
-};
-
-type Entry = {
-  id: number;
-  title: string;
-  excerpt: string;
-  published_at: string;
-};
-
-type PublicUser = {
-  id: number;
-  full_name: string;
-  email: string;
-  affiliation: UserAffiliation;
-  bio?: string;
-  avatar_url?: string | null;
-};
-
-// ─── Datos mock ────────────────────────────────────────────────────────────────
-
-const MOCK_USER: PublicUser = {
-  id: 1,
-  full_name: "María González Rodríguez",
-  email: "mgonzalezr@unal.edu.co",
-  affiliation: "student",
-  bio: "Estudiante de Ingeniería de Sistemas apasionada por la IA y el diseño de productos digitales. Trabajo en proyectos de impacto social dentro de la comunidad universitaria.",
-  avatar_url: null,
-};
-
-const MOCK_PROJECTS: Project[] = [
-  {
-    id: 1,
-    title: "Sistema de detección de plagio",
-    description: "Herramienta basada en NLP para detectar similitudes en documentos académicos.",
-    url: "https://github.com/ejemplo/plagio",
-  },
-  {
-    id: 2,
-    title: "App de movilidad universitaria",
-    description: "Plataforma para coordinar rutas y carpooling entre estudiantes de la UNAL.",
-    url: "https://movilidad-unal.vercel.app",
-  },
-];
-
-const MOCK_ENTRIES: Entry[] = [
-  {
-    id: 1,
-    title: "Cómo la IA está transformando la educación superior",
-    excerpt: "Un análisis de las herramientas que están cambiando la forma en que aprendemos y enseñamos en las universidades.",
-    published_at: "2025-03-12",
-  },
-  {
-    id: 2,
-    title: "El reto de la movilidad en los campus universitarios",
-    excerpt: "Reflexiones sobre cómo mejorar el transporte dentro y entre sedes universitarias usando tecnología.",
-    published_at: "2025-01-28",
-  },
-];
-
-// ─── Helpers ───────────────────────────────────────────────────────────────────
+import { AFFILIATION_LABELS, type User } from "@/lib/types/user";
+import type { Project } from "@/lib/types/project";
+import type { EntrySummary } from "@/lib/types/entry";
+import { getEntriesByAuthor, getMyProjects, getUserById } from "@/lib/api";
+import { EntryCard } from "@/components/entries/EntryCard";
 
 function getInitial(name: string) {
   return (name.trim()[0] ?? "?").toUpperCase();
 }
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("es-CO", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}
-
-// ─── Subcomponentes ────────────────────────────────────────────────────────────
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -95,23 +20,19 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
+function normalizeUrl(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  return /^https?:\/\//i.test(url) ? url : `https://${url}`;
+}
+
 function ProjectCard({ project }: { project: Project }) {
   return (
     <a
-      href={project.url}
+      href={normalizeUrl(project.url)}
       target="_blank"
       rel="noopener noreferrer"
       className="group flex items-start gap-4 rounded-xl border border-border bg-background/30 p-4 transition hover:border-primary/40 hover:bg-background/60"
     >
-      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-border bg-background/50">
-        {project.image_url ? (
-          <img src={project.image_url} alt={project.title} className="h-full w-full object-cover" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-subtle">
-            <Icon icon={RiImage2Line} size={18} />
-          </div>
-        )}
-      </div>
       <div className="min-w-0">
         <p className="truncate text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
           {project.title}
@@ -119,45 +40,87 @@ function ProjectCard({ project }: { project: Project }) {
         {project.description && (
           <p className="mt-0.5 line-clamp-2 text-xs text-muted">{project.description}</p>
         )}
-        <p className="mt-1 truncate text-xs text-subtle">{project.url}</p>
+        {project.url && <p className="mt-1 truncate text-xs text-subtle">{project.url}</p>}
       </div>
     </a>
   );
 }
 
-function EntryCard({ entry }: { entry: Entry }) {
-  return (
-    <Link
-      href={`/entries/${entry.id}`}
-      className="group flex flex-col gap-1 rounded-xl border border-border bg-background/30 p-4 transition hover:border-primary/40 hover:bg-background/60"
-    >
-      <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">
-        {entry.title}
-      </p>
-      <p className="text-xs text-muted line-clamp-2">{entry.excerpt}</p>
-      <p className="mt-1 text-xs text-subtle">{formatDate(entry.published_at)}</p>
-    </Link>
-  );
-}
-
 // ─── Componente principal ──────────────────────────────────────────────────────
 
-export function UserProfile() {
-  // TODO: reemplazar con llamada real al back usando el id de la URL
-  const user = MOCK_USER;
-  const projects = MOCK_PROJECTS;
-  const entries = MOCK_ENTRIES;
+type Props = {
+  userId: string;
+};
+
+export function UserProfile({ userId }: Props) {
+  const numericUserId = Number(userId);
+
+  const [user, setUser] = useState<User | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [entries, setEntries] = useState<EntrySummary[]>([]);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      if (!Number.isFinite(numericUserId)) {
+        setError("Usuario no válido.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const [userData, projectsData, entriesData] = await Promise.all([
+          getUserById(numericUserId),
+          getMyProjects(numericUserId),
+          getEntriesByAuthor(numericUserId),
+        ]);
+        if (cancelled) return;
+        setUser(userData);
+        setProjects(projectsData.items);
+        setEntries(entriesData.items);
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "No se pudo cargar este perfil.");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [numericUserId]);
+
+  if (loading) {
+    return (
+      <div className="mx-auto w-full max-w-2xl py-16 text-center text-sm text-muted">
+        Cargando perfil...
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="mx-auto w-full max-w-2xl py-16 text-center">
+        <p className="text-sm text-muted">{error ?? "Este usuario no existe."}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-8 px-6 py-10">
-
       {/* ── Cabecera del perfil ── */}
       <section className="flex flex-col items-center gap-5 text-center sm:flex-row sm:items-start sm:text-left">
-        {/* Avatar */}
         <div className="h-24 w-24 shrink-0 overflow-hidden rounded-full border-2 border-border bg-background/50">
-          {user.avatar_url ? (
+          {user.profile_picture ? (
             <img
-              src={user.avatar_url}
+              src={user.profile_picture}
               alt={user.full_name}
               className="h-full w-full object-cover"
             />
@@ -168,7 +131,6 @@ export function UserProfile() {
           )}
         </div>
 
-        {/* Info principal */}
         <div className="flex-1">
           <h1 className="ds-headline text-2xl text-foreground">{user.full_name}</h1>
           <p className="mt-1 text-sm text-muted">{AFFILIATION_LABELS[user.affiliation]}</p>
@@ -179,8 +141,8 @@ export function UserProfile() {
             <Icon icon={RiMailCheckLine} size={14} />
             {user.email}
           </a>
-          {user.bio && (
-            <p className="mt-3 text-sm leading-relaxed text-muted">{user.bio}</p>
+          {user.biography && (
+            <p className="mt-3 text-sm leading-relaxed text-muted">{user.biography}</p>
           )}
         </div>
       </section>
@@ -217,7 +179,6 @@ export function UserProfile() {
           </div>
         )}
       </section>
-
     </div>
   );
 }

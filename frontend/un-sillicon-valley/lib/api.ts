@@ -1,9 +1,9 @@
+import type { EntryCreatePayload, EntryDetail, EntryListResponse } from "@/lib/types/entry";
 import type {
   Comment,
   CommentCreatePayload,
   CommentListResponse,
 } from "@/lib/types/comment";
-import type { EntryCreatePayload, EntryDetail, EntryListResponse } from "@/lib/types/entry";
 import type {
   LoginPayload,
   MessageResponse,
@@ -13,10 +13,10 @@ import type {
 } from "@/lib/types/user";
 import type {
   CreateProjectPayload,
-  UpdateProjectPayload,
-  ProjectListResponse,
   Project,
-} from "@/lib/types/project"
+  ProjectListResponse,
+  UpdateProjectPayload,
+} from "@/lib/types/project";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://un-silicon-valley-236517281359.us-central1.run.app";
 
@@ -26,7 +26,6 @@ type ApiOptions = RequestInit & {
 
 async function apiFetch<T>(path: string, options: ApiOptions = {}): Promise<T> {
   const { json, headers, ...rest } = options;
-
   const response = await fetch(`${API_URL}${path}`, {
     ...rest,
     cache: "no-store",
@@ -38,23 +37,21 @@ async function apiFetch<T>(path: string, options: ApiOptions = {}): Promise<T> {
     body: json !== undefined ? JSON.stringify(json) : rest.body,
   });
 
-  if (response.status === 204) {
-  return undefined as T;
-  }
-
   if (!response.ok) {
     const errorBody = (await response.json().catch(() => null)) as {
       detail?: string | { msg: string }[];
     } | null;
-
     let message = "Ocurrió un error inesperado.";
     if (typeof errorBody?.detail === "string") {
       message = errorBody.detail;
     } else if (Array.isArray(errorBody?.detail) && errorBody.detail[0]?.msg) {
       message = errorBody.detail[0].msg;
     }
-
     throw new Error(message);
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
   }
 
   return response.json() as Promise<T>;
@@ -64,12 +61,12 @@ export function getEntries(page = 1): Promise<EntryListResponse> {
   return apiFetch<EntryListResponse>(`/entries?page=${page}`);
 }
 
-export function getEntry(id: number): Promise<EntryDetail> {
-  return apiFetch<EntryDetail>(`/entries/${id}`);
+export function getEntriesByAuthor(authorId: number, page = 1): Promise<EntryListResponse> {
+  return apiFetch<EntryListResponse>(`/entries?author_id=${authorId}&page=${page}`);
 }
 
-export function getSearch(terms: string): Promise<EntryListResponse> {
-  return apiFetch<EntryListResponse>(`/search?${terms}`);
+export function getEntry(id: number): Promise<EntryDetail> {
+  return apiFetch<EntryDetail>(`/entries/${id}`);
 }
 
 export function createEntry(payload: EntryCreatePayload): Promise<EntryDetail> {
@@ -139,24 +136,28 @@ export function updateUser(payload: UpdateUserPayload): Promise<User> {
   });
 }
 
+export function getUserById(id: number): Promise<User> {
+  return apiFetch<User>(`/users/${id}`);
+}
+
 export function getMyProjects(userId: number): Promise<ProjectListResponse> {
   return apiFetch<ProjectListResponse>(`/projects?user_id=${userId}&page_size=100`);
 }
- 
+
 export function createProject(payload: CreateProjectPayload): Promise<Project> {
   return apiFetch<Project>("/projects", {
     method: "POST",
     json: payload,
   });
 }
- 
+
 export function updateProject(id: number, payload: UpdateProjectPayload): Promise<Project> {
   return apiFetch<Project>(`/projects/${id}`, {
     method: "PUT",
     json: payload,
   });
 }
- 
+
 export function deleteProject(id: number): Promise<void> {
   return apiFetch<void>(`/projects/${id}`, {
     method: "DELETE",

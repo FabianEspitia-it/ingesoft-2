@@ -4,13 +4,15 @@ import { AuthGuard } from "@/components/auth/AuthGuard";
 
 export default function EditProfilePage() {
   return (
-    <AuthGuard redirectTo="/login?next=/user/edit">
       <div>
         <Header />
         <main className="mx-auto max-w-2xl px-6 py-10">
-          <EditProfileForm />
+          <AuthGuard redirectTo="/login?next=/user/edit">
+          <div className="ds-card p-8">
+            <EditProfileForm />
+          </div>
+          </AuthGuard>
         </main>
       </div>
-    </AuthGuard>
   );
 }
