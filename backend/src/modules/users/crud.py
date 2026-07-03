@@ -1,7 +1,7 @@
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.infrastructure.db.models import User
 from src.modules.users.schemas import UpdateUserRequest
-from src.modules.auth import crud
 
 async def update_user(
         db: AsyncSession, 
@@ -20,4 +20,9 @@ async def get_user_by_id(
         db: AsyncSession, 
         user_id: int
         ):
-    return crud.get_user_by_id(db, user_id)
+    result = await db.execute(
+        select(User)
+        .where(User.id == user_id)
+    )
+
+    return result.scalar_one_or_none()
