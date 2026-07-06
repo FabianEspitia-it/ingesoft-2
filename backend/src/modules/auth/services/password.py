@@ -4,7 +4,7 @@ BCRYPT_ROUNDS = 12
 
 
 def hash_password(plain_password: str) -> str:
-    """Hash a password using bcrypt with factor >= 12 (NFR-2)."""
+    """Hash a password using bcrypt with factor >= 12."""
     password_bytes = plain_password.encode("utf-8")
     salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
     return bcrypt.hashpw(password_bytes, salt).decode("utf-8")

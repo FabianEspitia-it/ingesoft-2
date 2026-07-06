@@ -244,7 +244,7 @@ export function Header({ variant = "default", activePath, disable = false }: Hea
             <Link href="/" className={navClass("/")}>
               Inicio
             </Link>
-            <Link href="/" className={navClass("/destacados")}>
+            <Link href="/featured" className={navClass("/destacados")}>
               Destacados
             </Link>
             <Link href="/" className={navClass("/casos-de-exito")}>

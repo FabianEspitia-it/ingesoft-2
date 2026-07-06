@@ -17,6 +17,7 @@ from src.modules.entries.router import entries_router
 from src.modules.search.router import search_router
 from src.modules.users.router import users_router
 from src.modules.projects.router import projects_router
+from src.modules.reactions.router import reactions_router
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +77,7 @@ app.include_router(auth_router)
 app.include_router(search_router)
 app.include_router(users_router)
 app.include_router(projects_router)
+app.include_router(reactions_router)
 
 # --- Register new module routers below this line ---
 

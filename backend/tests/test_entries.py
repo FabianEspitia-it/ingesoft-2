@@ -4,6 +4,7 @@ from httpx import AsyncClient
 
 @pytest.mark.asyncio
 async def test_list_entries_empty(client: AsyncClient):
+    """Verifica que el listado de entradas retorna vacío cuando no hay publicaciones en el sistema."""
     response = await client.get("/entries")
     assert response.status_code == 200
     payload = response.json()
@@ -13,6 +14,7 @@ async def test_list_entries_empty(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_create_entry_requires_auth(client: AsyncClient):
+    """Verifica que un usuario no autenticado no puede crear una entrada."""
     response = await client.post(
         "/entries",
         json={"title": "Mi entrada", "body": "Contenido de prueba"},
@@ -22,6 +24,7 @@ async def test_create_entry_requires_auth(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_create_and_read_entry(auth_client: AsyncClient):
+    """Verifica el flujo completo de crear una entrada y leerla, incluyendo el incremento de vistas."""
     create_response = await auth_client.post(
         "/entries",
         json={"title": "Startup UNAL", "body": "Historia de emprendimiento"},
@@ -42,6 +45,7 @@ async def test_create_and_read_entry(auth_client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_create_entry_requires_title(auth_client: AsyncClient):
+    """Verifica que una entrada sin título es rechazada con error de validación 422."""
     response = await auth_client.post(
         "/entries",
         json={"title": "", "body": "Contenido"},

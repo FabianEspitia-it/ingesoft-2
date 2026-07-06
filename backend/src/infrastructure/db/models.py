@@ -57,28 +57,28 @@ class User(Base):
         String(255),
         nullable=False,
         unique=True,
-        comment="Only @unal.edu.co addresses allowed (RN-1, RN-3)",
+        comment="Only @unal.edu.co addresses allowed",
     )
     full_name: Mapped[str] = mapped_column(
-        String(150), nullable=False, comment="Full name (RN-32)"
+        String(150), nullable=False, comment="Full name"
     )
     password: Mapped[str] = mapped_column(
-        String(255), nullable=False, comment="bcrypt hash, factor >= 12 (NFR-2)"
+        String(255), nullable=False, comment="bcrypt hash, factor >= 12"
     )
     affiliation: Mapped[UserAffiliation] = mapped_column(
-        Enum(UserAffiliation), nullable=False, comment="RN-5"
+        Enum(UserAffiliation), nullable=False
     )
     role: Mapped[UserRole] = mapped_column(
         Enum(UserRole),
         nullable=False,
         default=UserRole.author,
-        comment="RN-7; Visitor role is not persisted",
+        comment="Visitor role is not persisted",
     )
     email_verified: Mapped[bool] = mapped_column(
         Boolean,
         nullable=False,
         default=False,
-        comment="Must be verified before access (RN-2, NFR-4)",
+        comment="Must be verified before access",
     )
     biography: Mapped[str | None] = mapped_column(Text, nullable=True)
     profile_picture: Mapped[str | None] = mapped_column(String(500), nullable=True)
@@ -123,7 +123,7 @@ class ExternalLink(Base):
 
 
 class Project(Base):
-    """Portfolio project linked to a user (RN-32)."""
+    """Portfolio project linked to a user."""
 
     __tablename__ = "projects"
 
@@ -155,13 +155,13 @@ class Session(Base):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     expires_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, comment="JWT lifetime <= 24h (NFR-6)"
+        DateTime(timezone=True), nullable=False, comment="JWT lifetime <= 24h"
     )
     is_active: Mapped[bool] = mapped_column(
         Boolean,
         nullable=False,
         default=True,
-        comment="Revoked on logout (RN-37)",
+        comment="Revoked on logout",
     )
 
     # Relationships
@@ -192,13 +192,13 @@ class Entry(Base):
         comment="Author writes Entry",
     )
     title: Mapped[str] = mapped_column(
-        String(255), nullable=False, comment="Required (RN-15)"
+        String(255), nullable=False, comment="Required"
     )
-    body: Mapped[str] = mapped_column(Text, nullable=False, comment="Required (RN-15)")
+    body: Mapped[str] = mapped_column(Text, nullable=False, comment="Required")
     cover_image: Mapped[str | None] = mapped_column(
         String(500),
         nullable=True,
-        comment="Optional, JPG/PNG <=5MB in Cloud Storage (RN-18, NFR-13)",
+        comment="Optional, JPG/PNG <=5MB in Cloud Storage",
     )
     status: Mapped[EntryStatus] = mapped_column(
         Enum(EntryStatus),
@@ -209,10 +209,10 @@ class Entry(Base):
         Boolean,
         nullable=False,
         default=False,
-        comment="Flagged by admin only (RN-23)",
+        comment="Flagged by admin only",
     )
     view_count: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, comment="RN-26"
+        Integer, nullable=False, default=0
     )
     published_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
@@ -220,7 +220,7 @@ class Entry(Base):
     updated_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
-        comment="Shown if entry was edited (RN-19)",
+        comment="Shown if entry was edited",
     )
     deleted_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True, comment="Soft-delete timestamp"
@@ -248,7 +248,7 @@ class Entry(Base):
 
 
 class Tag(Base):
-    """Free-form tags added by authors (RN-17, FR-5, RN-16)."""
+    """Free-form tags added by authors."""
 
     __tablename__ = "tags"
 
@@ -291,7 +291,7 @@ class Comment(Base):
         Integer,
         ForeignKey("entries.id", ondelete="CASCADE"),
         nullable=False,
-        comment="Entry contains Comment; ON DELETE CASCADE (RN-20)",
+        comment="Entry contains Comment; ON DELETE CASCADE",
     )
     author_id: Mapped[int] = mapped_column(
         Integer,
@@ -318,7 +318,7 @@ class Comment(Base):
 
 
 class Reaction(Base):
-    """Like / dislike reactions on entries (RN-21)."""
+    """Like / dislike reactions on entries."""
 
     __tablename__ = "reactions"
 
@@ -349,7 +349,7 @@ class Reaction(Base):
             "user_id",
             "entry_id",
             name="reactions_user_entry_key",
-            comment="One reaction per user per entry (RN-21)",
+            comment="One reaction per user per entry",
         ),
         Index("idx_reactions_user_entry", "user_id", "entry_id", unique=True),
         Index("idx_reactions_entry_id", "entry_id"),

@@ -8,7 +8,7 @@ _attempts: dict[str, list[datetime]] = defaultdict(list)
 
 
 def check_login_rate_limit(email: str) -> None:
-    """Raise ValueError if the email has exceeded login attempts (NFR-8)."""
+    """Raise ValueError if the email has exceeded login attempts."""
     now = datetime.now(UTC)
     window_start = now - LOGIN_WINDOW
     recent = [ts for ts in _attempts[email] if ts > window_start]

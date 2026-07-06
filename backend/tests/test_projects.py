@@ -58,6 +58,7 @@ async def other_auth_client(client: AsyncClient, db_session: AsyncSession) -> As
 # ─── GET /projects ─────────────────────────────────────────────────────────────
 
 async def test_list_projects_empty(client: AsyncClient):
+    """Verifica que el listado de proyectos retorna vacío cuando no hay proyectos creados."""
     response = await client.get("/projects")
 
     assert response.status_code == 200
@@ -70,6 +71,7 @@ async def test_list_projects_returns_project(
     client: AsyncClient,
     test_project: Project,
 ):
+    """Verifica que el listado de proyectos incluye un proyecto existente con su título correcto."""
     response = await client.get("/projects")
 
     assert response.status_code == 200
@@ -81,6 +83,7 @@ async def test_list_projects_returns_project(
 # ─── GET /projects/{id} ────────────────────────────────────────────────────────
 
 async def test_get_project_success(client: AsyncClient, test_project: Project):
+    """Verifica que se puede obtener un proyecto por su ID con todos sus campos."""
     response = await client.get(f"/projects/{test_project.id}")
 
     assert response.status_code == 200
@@ -93,6 +96,7 @@ async def test_get_project_success(client: AsyncClient, test_project: Project):
 
 
 async def test_get_project_not_found(client: AsyncClient):
+    """Verifica que solicitar un proyecto inexistente retorna 404."""
     response = await client.get("/projects/999999")
 
     assert response.status_code == 404
@@ -105,6 +109,7 @@ async def test_create_project_success(
     db_session: AsyncSession,
     test_user: User,
 ):
+    """Verifica que un usuario autenticado puede crear un proyecto con título, descripción y URL."""
     payload = {
         "title": "Nuevo proyecto",
         "description": "Una descripción",
@@ -126,6 +131,7 @@ async def test_create_project_success(
 
 
 async def test_create_project_only_title_required(auth_client: AsyncClient):
+    """Verifica que solo el título es obligatorio al crear un proyecto (descripción y URL son opcionales)."""
     response = await auth_client.post("/projects", json={"title": "Solo título"})
 
     assert response.status_code == 201
@@ -136,18 +142,21 @@ async def test_create_project_only_title_required(auth_client: AsyncClient):
 
 
 async def test_create_project_requires_auth(client: AsyncClient):
+    """Verifica que crear un proyecto sin autenticación retorna 401."""
     response = await client.post("/projects", json={"title": "Proyecto"})
 
     assert response.status_code == 401
 
 
 async def test_create_project_rejects_empty_title(auth_client: AsyncClient):
+    """Verifica que un título vacío es rechazado con error de validación 422."""
     response = await auth_client.post("/projects", json={"title": ""})
 
     assert response.status_code == 422
 
 
 async def test_create_project_rejects_missing_title(auth_client: AsyncClient):
+    """Verifica que omitir el campo título es rechazado con error de validación 422."""
     response = await auth_client.post("/projects", json={"description": "Sin título"})
 
     assert response.status_code == 422
@@ -160,6 +169,7 @@ async def test_update_project_success(
     db_session: AsyncSession,
     test_project: Project,
 ):
+    """Verifica que el propietario puede actualizar el título de su proyecto."""
     response = await auth_client.put(
         f"/projects/{test_project.id}",
         json={"title": "Título actualizado"},
@@ -177,6 +187,7 @@ async def test_update_project_partial_keeps_other_fields(
     auth_client: AsyncClient,
     test_project: Project,
 ):
+    """Verifica que una actualización parcial conserva los campos no modificados."""
     response = await auth_client.put(
         f"/projects/{test_project.id}",
         json={"title": "Solo cambia el título"},
@@ -193,6 +204,7 @@ async def test_update_project_requires_auth(
     client: AsyncClient,
     test_project: Project,
 ):
+    """Verifica que actualizar un proyecto sin autenticación retorna 401."""
     response = await client.put(
         f"/projects/{test_project.id}",
         json={"title": "Hacker"},
@@ -202,6 +214,7 @@ async def test_update_project_requires_auth(
 
 
 async def test_update_project_not_found(auth_client: AsyncClient):
+    """Verifica que actualizar un proyecto inexistente retorna 404."""
     response = await auth_client.put(
         "/projects/999999",
         json={"title": "No existe"},
@@ -214,6 +227,7 @@ async def test_update_project_forbidden_for_other_user(
     other_auth_client: AsyncClient,
     test_project: Project,
 ):
+    """Verifica que un usuario no puede actualizar el proyecto de otro usuario (retorna 403)."""
     response = await other_auth_client.put(
         f"/projects/{test_project.id}",
         json={"title": "Intento hackear"},
@@ -229,6 +243,7 @@ async def test_delete_project_success(
     db_session: AsyncSession,
     test_project: Project,
 ):
+    """Verifica que el propietario puede eliminar su proyecto y este deja de existir en la base de datos."""
     response = await auth_client.delete(f"/projects/{test_project.id}")
 
     assert response.status_code == 204
@@ -243,12 +258,14 @@ async def test_delete_project_requires_auth(
     client: AsyncClient,
     test_project: Project,
 ):
+    """Verifica que eliminar un proyecto sin autenticación retorna 401."""
     response = await client.delete(f"/projects/{test_project.id}")
 
     assert response.status_code == 401
 
 
 async def test_delete_project_not_found(auth_client: AsyncClient):
+    """Verifica que eliminar un proyecto inexistente retorna 404."""
     response = await auth_client.delete("/projects/999999")
 
     assert response.status_code == 404
@@ -258,6 +275,7 @@ async def test_delete_project_forbidden_for_other_user(
     other_auth_client: AsyncClient,
     test_project: Project,
 ):
+    """Verifica que un usuario no puede eliminar el proyecto de otro usuario (retorna 403)."""
     response = await other_auth_client.delete(f"/projects/{test_project.id}")
 
     assert response.status_code == 403

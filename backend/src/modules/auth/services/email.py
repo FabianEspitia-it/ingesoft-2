@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 def send_verification_email(user: User, verification_token: str) -> None:
-    """Send an email verification link via Resend (NFR-4)."""
+    """Send an email verification link via Resend."""
     if not settings.RESEND_KEY or not settings.RESEND_FROM_EMAIL:
         logger.warning(
             "Resend no configurado; omitiendo envío de correo a %s",

@@ -21,7 +21,7 @@ def _encode(payload: dict, expiration: timedelta) -> str:
 
 
 def create_session_token(user_id: int) -> tuple[str, datetime]:
-    """Create a JWT session token (NFR-1, NFR-6)."""
+    """Create a JWT session token."""
     expiration = timedelta(hours=settings.JWT_EXPIRATION_HOURS)
     token = _encode(
         {"sub": str(user_id), "type": SESSION_TOKEN_TYPE},

@@ -16,7 +16,7 @@ async def get_current_user(
     """
     Resolve the authenticated user from the session cookie.
 
-    Validates active session, non-deleted user, and verified email (RN-2).
+    Validates active session, non-deleted user, and verified email.
     """
     token = request.cookies.get("session")
     if not token:
@@ -52,7 +52,7 @@ async def get_current_user(
 
 
 def require_role(*roles: UserRole):
-    """Dependency factory for role-based access control (RN-7, NFR-7)."""
+    """Dependency factory for role-based access control."""
 
     async def _require_role(current_user: User = Depends(get_current_user)) -> User:
         if current_user.role not in roles:

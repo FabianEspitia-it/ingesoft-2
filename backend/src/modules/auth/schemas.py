@@ -20,7 +20,7 @@ class RegisterRequest(BaseModel):
         normalized = value.lower().strip()
         if not normalized.endswith(UNAL_EMAIL_SUFFIX):
             raise ValueError(
-                "Solo se permiten correos institucionales @unal.edu.co (RN-1)."
+                "Solo se permiten correos institucionales @unal.edu.co."
             )
         return normalized
 
@@ -30,7 +30,7 @@ class RegisterRequest(BaseModel):
         if not PASSWORD_PATTERN.match(value):
             raise ValueError(
                 "La contraseña debe tener al menos 8 caracteres, "
-                "una mayúscula y un número (RN-6)."
+                "una mayúscula y un número."
             )
         return value
 
@@ -38,7 +38,7 @@ class RegisterRequest(BaseModel):
     @classmethod
     def validate_terms(cls, value: bool) -> bool:
         if not value:
-            raise ValueError("Debes aceptar los términos y condiciones (RN-4).")
+            raise ValueError("Debes aceptar los términos y condiciones.")
         return value
 
 

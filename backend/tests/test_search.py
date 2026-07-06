@@ -77,6 +77,7 @@ async def search_dataset(db_session: AsyncSession, test_user: User):
     ],
 )
 def test_normalize(value, expected):
+    """Verifica que la función _normalize limpia y normaliza correctamente los términos de búsqueda."""
     assert _normalize(value) == expected
 
 
@@ -85,6 +86,7 @@ async def test_search_without_filters_returns_published_entries(
     db_session: AsyncSession,
     search_dataset,
 ):
+    """Verifica que una búsqueda sin filtros retorna todas las entradas publicadas (excluyendo rechazadas)."""
     results = await search_terms(db_session, None, None, None, None)
 
     titles = {entry.title for entry in results}
@@ -93,6 +95,7 @@ async def test_search_without_filters_returns_published_entries(
 
 @pytest.mark.asyncio
 async def test_search_by_title_only(db_session: AsyncSession, search_dataset):
+    """Verifica que la búsqueda por título filtra correctamente las entradas que coinciden."""
     results = await search_terms(db_session, None, "marketing", None, None)
 
     assert len(results) == 1
@@ -101,6 +104,7 @@ async def test_search_by_title_only(db_session: AsyncSession, search_dataset):
 
 @pytest.mark.asyncio
 async def test_search_by_author_only(db_session: AsyncSession, search_dataset):
+    """Verifica que la búsqueda por autor filtra correctamente por nombre del autor."""
     results = await search_terms(db_session, None, None, "María", None)
 
     assert len(results) == 1
@@ -109,6 +113,7 @@ async def test_search_by_author_only(db_session: AsyncSession, search_dataset):
 
 @pytest.mark.asyncio
 async def test_search_by_title_and_author(db_session: AsyncSession, search_dataset):
+    """Verifica que la búsqueda combinada por título y autor aplica ambos filtros simultáneamente."""
     matching = await search_terms(db_session, None, "Pitch", "Autor", None)
     non_matching = await search_terms(db_session, None, "Pitch", "María", None)
 
@@ -119,6 +124,7 @@ async def test_search_by_title_and_author(db_session: AsyncSession, search_datas
 
 @pytest.mark.asyncio
 async def test_search_by_tag(db_session: AsyncSession, search_dataset):
+    """Verifica que la búsqueda por etiqueta retorna solo las entradas asociadas a esa etiqueta."""
     results = await search_terms(db_session, None, None, None, "Growth")
 
     assert len(results) == 1
@@ -130,6 +136,7 @@ async def test_search_by_terms_matches_title_or_author(
     db_session: AsyncSession,
     search_dataset,
 ):
+    """Verifica que la búsqueda general por términos busca coincidencias tanto en título como en autor."""
     by_title = await search_terms(db_session, "marketing", None, None, None)
     by_author = await search_terms(db_session, "María", None, None, None)
 
@@ -144,6 +151,7 @@ async def test_search_endpoint_returns_matching_items(
     client: AsyncClient,
     search_dataset,
 ):
+    """Verifica que el endpoint HTTP de búsqueda retorna resultados paginados que coinciden con el filtro."""
     response = await client.get("/search", params={"title": "Pitch"})
 
     assert response.status_code == 200
@@ -159,6 +167,7 @@ async def test_search_endpoint_uses_terms_over_advanced_filters(
     client: AsyncClient,
     search_dataset,
 ):
+    """Verifica que cuando se proporcionan 'terms' junto con filtros avanzados, 'terms' tiene prioridad."""
     response = await client.get(
         "/search",
         params={"terms": "María", "title": "Pitch", "author": "Autor", "tag": "Growth"},

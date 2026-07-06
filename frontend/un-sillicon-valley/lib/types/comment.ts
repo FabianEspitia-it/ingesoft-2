@@ -20,3 +20,7 @@ export type CommentListResponse = {
 export type CommentCreatePayload = {
   content: string;
 };
+
+export type CommentUpdatePayload = {
+  content: string;
+};

@@ -34,6 +34,31 @@ export type EntryCreatePayload = {
   tags?: string[];
 };
 
+export type ReactionSummary = {
+  likes: number;
+  dislikes: number;
+  user_reaction: string | null;
+};
+
+export type FeaturedEntrySummary = {
+  id: number;
+  title: string;
+  published_at: string;
+  view_count: number;
+  likes: number;
+  comments_count: number;
+  author: AuthorSummary;
+  categories: string[];
+  tags: string[];
+};
+
+export type FeaturedEntryResponse = {
+  items: FeaturedEntrySummary[];
+  total: number;
+  page: number;
+  page_size: number;
+};
+
 export const AFFILIATION_LABELS: Record<string, string> = {
   student: "Estudiante",
   graduate: "Egresado",

@@ -1,7 +1,9 @@
+from datetime import UTC, datetime, timedelta
+
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from src.infrastructure.db.models import Entry, EntryStatus, Tag, User
+from src.infrastructure.db.models import Comment, Entry, EntryStatus, Reaction, ReactionType, Tag, User
 from src.modules.entries.categories import normalize_category
 from src.modules.entries.schemas import EntryCreate
 
@@ -124,3 +126,96 @@ async def create_entry(
         .where(Entry.id == entry.id)
     )
     return result.scalar_one()
+
+
+async def list_featured_entries(
+    db: AsyncSession,
+    *,
+    page: int = 1,
+    page_size: int = 20,
+) -> tuple[list[dict], int]:
+    """
+    Return entries that exceed the average likes+comments of the last month.
+    """
+    one_month_ago = datetime.now(UTC) - timedelta(days=30)
+    base_filters = [
+        Entry.deleted_at.is_(None),
+        Entry.status == EntryStatus.published,
+        Entry.published_at >= one_month_ago,
+    ]
+
+    likes_subq = (
+        select(
+            Reaction.entry_id,
+            func.count().label("like_count"),
+        )
+        .where(Reaction.type == ReactionType.like)
+        .group_by(Reaction.entry_id)
+        .subquery()
+    )
+
+    comments_subq = (
+        select(
+            Comment.entry_id,
+            func.count().label("comment_count"),
+        )
+        .group_by(Comment.entry_id)
+        .subquery()
+    )
+
+    avg_likes_result = await db.execute(
+        select(func.avg(func.coalesce(likes_subq.c.like_count, 0)))
+        .select_from(Entry)
+        .outerjoin(likes_subq, Entry.id == likes_subq.c.entry_id)
+        .where(*base_filters)
+    )
+    avg_likes = float(avg_likes_result.scalar_one() or 0)
+
+    avg_comments_result = await db.execute(
+        select(func.avg(func.coalesce(comments_subq.c.comment_count, 0)))
+        .select_from(Entry)
+        .outerjoin(comments_subq, Entry.id == comments_subq.c.entry_id)
+        .where(*base_filters)
+    )
+    avg_comments = float(avg_comments_result.scalar_one() or 0)
+
+    featured_query = (
+        select(
+            Entry,
+            func.coalesce(likes_subq.c.like_count, 0).label("likes"),
+            func.coalesce(comments_subq.c.comment_count, 0).label("comments_count"),
+        )
+        .outerjoin(likes_subq, Entry.id == likes_subq.c.entry_id)
+        .outerjoin(comments_subq, Entry.id == comments_subq.c.entry_id)
+        .where(
+            *base_filters,
+            (func.coalesce(likes_subq.c.like_count, 0) + func.coalesce(comments_subq.c.comment_count, 0))
+            > (avg_likes + avg_comments),
+        )
+    )
+
+    count_result = await db.execute(
+        select(func.count()).select_from(featured_query.subquery())
+    )
+    total = count_result.scalar_one()
+
+    offset = (page - 1) * page_size
+    result = await db.execute(
+        featured_query
+        .options(selectinload(Entry.author), selectinload(Entry.tags))
+        .order_by(
+            (func.coalesce(likes_subq.c.like_count, 0) + func.coalesce(comments_subq.c.comment_count, 0)).desc()
+        )
+        .offset(offset)
+        .limit(page_size)
+    )
+
+    entries = []
+    for row in result.all():
+        entries.append({
+            "entry": row[0],
+            "likes": row[1],
+            "comments_count": row[2],
+        })
+
+    return entries, total

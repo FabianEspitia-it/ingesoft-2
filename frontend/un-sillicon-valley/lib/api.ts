@@ -1,8 +1,9 @@
-import type { EntryCreatePayload, EntryDetail, EntryListResponse } from "@/lib/types/entry";
+import type { EntryCreatePayload, EntryDetail, EntryListResponse, FeaturedEntryResponse, ReactionSummary } from "@/lib/types/entry";
 import type {
   Comment,
   CommentCreatePayload,
   CommentListResponse,
+  CommentUpdatePayload,
 } from "@/lib/types/comment";
 import type {
   LoginPayload,
@@ -92,6 +93,41 @@ export function createComment(
     method: "POST",
     json: payload,
   });
+}
+
+export function updateComment(
+  entryId: number,
+  commentId: number,
+  payload: CommentUpdatePayload,
+): Promise<Comment> {
+  return apiFetch<Comment>(`/entries/${entryId}/comments/${commentId}`, {
+    method: "PUT",
+    json: payload,
+  });
+}
+
+export function deleteComment(
+  entryId: number,
+  commentId: number,
+): Promise<void> {
+  return apiFetch<void>(`/entries/${entryId}/comments/${commentId}`, {
+    method: "DELETE",
+  });
+}
+
+export function getReactions(entryId: number): Promise<ReactionSummary> {
+  return apiFetch<ReactionSummary>(`/entries/${entryId}/reactions`);
+}
+
+export function toggleReaction(entryId: number, type: string): Promise<ReactionSummary> {
+  return apiFetch<ReactionSummary>(`/entries/${entryId}/reactions`, {
+    method: "POST",
+    json: { type },
+  });
+}
+
+export function getFeaturedEntries(page = 1): Promise<FeaturedEntryResponse> {
+  return apiFetch<FeaturedEntryResponse>(`/entries/featured?page=${page}`);
 }
 
 export function getSearch(terms: string): Promise<EntryListResponse> {

@@ -55,7 +55,7 @@ async def register(
     payload: RegisterRequest,
     db: AsyncSession = Depends(get_db),
 ):
-    """US-6: Register a new author account (RN-1, RN-3, RN-4, RN-5, NFR-2)."""
+    """Register a new author account."""
     existing = await crud.get_user_by_email(db, payload.email)
     if existing is not None:
         raise HTTPException(
@@ -80,7 +80,7 @@ async def verify_email(
     response: Response,
     db: AsyncSession = Depends(get_db),
 ):
-    """US-6: Verify institutional email and start session (RN-2)."""
+    """Verify institutional email and start session."""
     try:
         token_payload = decode_token(payload.token, EMAIL_VERIFY_TOKEN_TYPE)
         user_id = int(token_payload["sub"])
@@ -109,7 +109,7 @@ async def login(
     response: Response,
     db: AsyncSession = Depends(get_db),
 ):
-    """US-7: Authenticate with institutional email and password (NFR-1)."""
+    """Authenticate with institutional email and password."""
     try:
         check_login_rate_limit(payload.email)
     except ValueError as exc:
@@ -143,7 +143,7 @@ async def logout(
     response: Response,
     db: AsyncSession = Depends(get_db),
 ):
-    """US-8: Revoke active session and clear cookie (RN-37)."""
+    """Revoke active session and clear cookie."""
     token = request.cookies.get("session")
     if token:
         session = await crud.get_active_session_by_token(db, token)
