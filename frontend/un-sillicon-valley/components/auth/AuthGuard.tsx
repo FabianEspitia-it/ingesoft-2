@@ -8,9 +8,13 @@ import { getCurrentUser } from "@/lib/api";
 export function AuthGuard({
   children,
   redirectTo = "/login?next=/entries/new",
+  requireAdmin = false,
+  adminRedirectTo = "/",
 }: {
   children: React.ReactNode;
   redirectTo?: string;
+  requireAdmin?: boolean;
+  adminRedirectTo?: string; 
 }) {
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -27,6 +31,11 @@ export function AuthGuard({
         return;
       }
 
+      if (requireAdmin && user.role !== "administrator") {
+        router.replace(adminRedirectTo);
+        return;
+      }
+
       setIsAuthorized(true);
     }
 
@@ -35,7 +44,7 @@ export function AuthGuard({
     return () => {
       cancelled = true;
     };
-  }, [router, redirectTo]);
+  }, [router, redirectTo, requireAdmin, adminRedirectTo]);
 
   if (!isAuthorized) {
     return (
