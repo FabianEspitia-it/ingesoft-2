@@ -24,5 +24,5 @@ export {
   RiDeleteBinLine,
   RiEditLine,
   RiImage2Line,
-  RiImageLine
+  RiArticleLine,
 } from "@remixicon/react";
