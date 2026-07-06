@@ -182,6 +182,7 @@ export function Header({ variant = "default", activePath, disable = false }: Hea
     effectiveVariant === "marketing";
 
   const showSearch =
+    effectiveVariant === "default" ||
     effectiveVariant === "marketing";
 
   useEffect(() => {
