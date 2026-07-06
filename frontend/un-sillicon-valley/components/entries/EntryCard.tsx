@@ -11,6 +11,11 @@ export function EntryCard({ entry }: EntryCardProps) {
 
   return (
     <article className="ds-card group p-6 transition hover:border-primary/30">
+      {entry.is_success_case && (
+        <span className="mb-3 inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">
+          ⭐ Caso de éxito
+        </span>
+      )}
       <div className="mb-3 flex items-center justify-between gap-4 text-sm text-subtle">
         <span>{formatPublishedDate(entry.published_at)}</span>
         <span>{entry.view_count} vistas</span>

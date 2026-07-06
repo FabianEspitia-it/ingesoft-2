@@ -9,6 +9,7 @@ export type EntrySummary = {
   title: string;
   published_at: string;
   view_count: number;
+  is_success_case: boolean;
   author: AuthorSummary;
   categories: string[];
   tags: string[];

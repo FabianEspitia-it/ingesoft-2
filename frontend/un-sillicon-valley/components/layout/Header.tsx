@@ -268,8 +268,7 @@ export function Header({ variant = "default", activePath, disable = false }: Hea
             <Link href="/featured" className={navClass("/destacados")}>
               Destacados
             </Link>
-
-            <Link href="/" className={navClass("/casos-de-exito")}>
+            <Link href="/casos-de-exito" className={navClass("/casos-de-exito")}>
               Casos de éxito
             </Link>
           </nav>
@@ -302,7 +301,7 @@ export function Header({ variant = "default", activePath, disable = false }: Hea
                 </span>
                 <input
                   type="search"
-                  placeholder="Buscar entradas…"
+                  placeholder="Buscar por título, autor, categoría o tag..."
                   disabled={disable}
                   aria-disabled={disable}
                   title={disable ? "Desactivado durante búsqueda avanzada" : undefined}

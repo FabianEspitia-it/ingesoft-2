@@ -65,6 +65,7 @@ class EntrySummary(BaseModel):
     title: str
     published_at: datetime
     view_count: int
+    is_success_case: bool = False
     author: AuthorSummary
     categories: list[str] = Field(default_factory=list)
     tags: list[str] = Field(default_factory=list)
@@ -76,6 +77,7 @@ class EntrySummary(BaseModel):
             title=entry.title,
             published_at=entry.published_at,
             view_count=entry.view_count,
+            is_success_case=entry.is_success_case,
             author=AuthorSummary.model_validate(entry.author),
             categories=_categories_of(entry),
             tags=_free_tags_of(entry),
@@ -91,6 +93,7 @@ class EntryDetail(BaseModel):
     published_at: datetime
     updated_at: datetime | None
     view_count: int
+    is_success_case: bool = False
     cover_image: str | None
     author: AuthorSummary
     categories: list[str] = Field(default_factory=list)
@@ -105,6 +108,7 @@ class EntryDetail(BaseModel):
             published_at=entry.published_at,
             updated_at=entry.updated_at,
             view_count=entry.view_count,
+            is_success_case=entry.is_success_case,
             cover_image=entry.cover_image,
             author=AuthorSummary.model_validate(entry.author),
             categories=_categories_of(entry),
@@ -152,6 +156,12 @@ class FeaturedEntryResponse(BaseModel):
     total: int
     page: int
     page_size: int
+
+
+class SuccessCaseUpdate(BaseModel):
+    """Admin toggle to (un)feature an entry as a success case (RN-23)."""
+
+    is_success_case: bool
 
 
 def _categories_of(entry) -> list[str]:

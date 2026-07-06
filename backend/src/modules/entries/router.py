@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.api.dependencies import get_current_user
+from src.api.dependencies import get_current_user, require_role
 from src.infrastructure.db.database import get_db
-from src.infrastructure.db.models import User
+from src.infrastructure.db.models import User, UserRole
 from src.modules.entries import crud
 from src.modules.entries.schemas import (
     EntryCreate,
@@ -11,6 +11,7 @@ from src.modules.entries.schemas import (
     EntrySummary,
     FeaturedEntryResponse,
     FeaturedEntrySummary,
+    SuccessCaseUpdate,
 )
 
 entries_router = APIRouter(prefix="/entries", tags=["Entries"])
@@ -38,11 +39,18 @@ async def list_entries(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=MAX_PAGE_SIZE),
     author_id: int | None = Query(None),
+    is_success_case: bool | None = Query(
+        None, description="Filter by admin-flagged success cases (RN-23)."
+    ),
     db: AsyncSession = Depends(get_db),
 ):
     """List published entries ordered by date."""
     entries, total = await crud.list_entries(
-        db, page=page, page_size=page_size, author_id=author_id
+        db,
+        page=page,
+        page_size=page_size,
+        author_id=author_id,
+        is_success_case=is_success_case,
     )
     return EntryListResponse(
         items=[EntrySummary.from_entry(entry) for entry in entries],
@@ -65,6 +73,24 @@ async def get_entry(
             detail="Entrada no encontrada.",
         )
     await crud.increment_view_count(db, entry)
+    return EntryDetail.from_entry(entry)
+
+
+@entries_router.patch("/{entry_id}/success-case", response_model=EntryDetail)
+async def set_entry_success_case(
+    entry_id: int,
+    payload: SuccessCaseUpdate,
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(require_role(UserRole.administrator)),
+):
+    """Admin-only: feature or unfeature an entry as a success case (RN-23)."""
+    entry = await crud.get_entry_by_id(db, entry_id)
+    if entry is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Entrada no encontrada.",
+        )
+    await crud.set_success_case(db, entry, payload.is_success_case)
     return EntryDetail.from_entry(entry)
 
 

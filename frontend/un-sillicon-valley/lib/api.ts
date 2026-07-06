@@ -66,6 +66,10 @@ export function getEntriesByAuthor(authorId: number, page = 1): Promise<EntryLis
   return apiFetch<EntryListResponse>(`/entries?author_id=${authorId}&page=${page}`);
 }
 
+export function getSuccessCases(page = 1): Promise<EntryListResponse> {
+  return apiFetch<EntryListResponse>(`/entries?is_success_case=true&page=${page}`);
+}
+
 export function getEntry(id: number): Promise<EntryDetail> {
   return apiFetch<EntryDetail>(`/entries/${id}`);
 }
@@ -74,6 +78,13 @@ export function createEntry(payload: EntryCreatePayload): Promise<EntryDetail> {
   return apiFetch<EntryDetail>("/entries", {
     method: "POST",
     json: payload,
+  });
+}
+
+export function setSuccessCase(id: number, isSuccessCase: boolean): Promise<EntryDetail> {
+  return apiFetch<EntryDetail>(`/entries/${id}/success-case`, {
+    method: "PATCH",
+    json: { is_success_case: isSuccessCase },
   });
 }
 

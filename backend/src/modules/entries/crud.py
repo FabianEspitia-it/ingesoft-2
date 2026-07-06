@@ -14,6 +14,7 @@ async def list_entries(
     page: int = 1,
     page_size: int = 20,
     author_id: int | None = None,
+    is_success_case: bool | None = None,
 ) -> tuple[list[Entry], int]:
     offset = (page - 1) * page_size
     filters = [
@@ -22,6 +23,8 @@ async def list_entries(
     ]
     if author_id is not None:
         filters.append(Entry.author_id == author_id)
+    if is_success_case is not None:
+        filters.append(Entry.is_success_case.is_(is_success_case))
 
     count_result = await db.execute(
         select(func.count()).select_from(Entry).where(*filters)
@@ -55,6 +58,14 @@ async def increment_view_count(db: AsyncSession, entry: Entry) -> None:
     entry.view_count += 1
     db.add(entry)
     await db.flush()
+
+
+async def set_success_case(db: AsyncSession, entry: Entry, value: bool) -> Entry:
+    """Flag or unflag an entry as a success case (RN-23, admin only)."""
+    entry.is_success_case = value
+    db.add(entry)
+    await db.flush()
+    return entry
 
 
 async def resolve_entry_tags(

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { CommentSection } from "@/components/comments/CommentSection";
 import { ReactionBar } from "@/components/entries/ReactionBar";
+import { SuccessCaseToggle } from "@/components/entries/SuccessCaseToggle";
 import { Header } from "@/components/layout/Header";
 import { getEntry } from "@/lib/api";
 import { AFFILIATION_LABELS, formatPublishedDate } from "@/lib/types/entry";
@@ -37,6 +38,11 @@ export default async function EntryDetailPage({ params }: EntryDetailPageProps) 
         </Link>
 
         <article className="ds-card mt-6 p-8">
+          {entry.is_success_case && (
+            <span className="mb-3 inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">
+              ⭐ Caso de éxito
+            </span>
+          )}
           <p className="text-sm text-subtle">{formatPublishedDate(entry.published_at)}</p>
           <h1 className="ds-headline mt-2 text-4xl text-foreground">{entry.title}</h1>
 
@@ -71,6 +77,8 @@ export default async function EntryDetailPage({ params }: EntryDetailPageProps) 
           <p className="mt-8 text-sm text-subtle">{entry.view_count} vistas</p>
 
           <ReactionBar entryId={entry.id} />
+
+          <SuccessCaseToggle entryId={entry.id} initialValue={entry.is_success_case} />
         </article>
 
         <CommentSection entryId={entry.id} />
