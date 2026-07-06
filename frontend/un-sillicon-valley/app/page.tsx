@@ -14,7 +14,7 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header variant="marketing" activePath="/" />
+      <Header activePath="/"/>
       <main className="mx-auto max-w-5xl px-6 py-10">
         <section className="mb-10">
           <p className="ds-eyebrow">Comunidad UNAL</p>
