@@ -10,7 +10,7 @@ import { Logo } from "@/components/layout/Logo";
 import type { User } from "@/lib/types/user";
 
 type HeaderProps = {
-  variant?: "default" | "marketing";
+  variant?: "default" | "marketing" | "panel";
   activePath?: string;
   disable?: boolean;
 };
@@ -48,7 +48,7 @@ function GuestAuthActions({
   variant,
 }: {
   activePath?: string;
-  variant: "default" | "marketing";
+  variant: "default" | "marketing" | "panel" ;
 }) {
   return (
     <>
@@ -74,6 +74,7 @@ function UserAuthActions({
   menuOpen,
   menuRef,
   isLoggingOut,
+  variant,
   onToggleMenu,
   onLogout,
   onCloseMenu,
@@ -82,17 +83,23 @@ function UserAuthActions({
   menuOpen: boolean;
   menuRef: React.RefObject<HTMLDivElement | null>;
   isLoggingOut: boolean;
+  variant: "default" | "marketing" | "panel";
   onToggleMenu: () => void;
   onLogout: () => void;
   onCloseMenu: () => void;
 }) {
+  const primaryAction = 
+    variant === "panel"
+      ? { href: "/admin", label: "Panel de control" }
+      : { href: "/entries/new", label: "Crear entrada" };
+
   return (
     <>
       <Link
-        href="/entries/new"
+        href={primaryAction.href}
         className="ds-btn ds-btn-primary ds-btn-pill header-create-btn shrink-0"
       >
-        Crear entrada
+        {primaryAction.label}
       </Link>
 
       <div className="relative shrink-0" ref={menuRef}>
@@ -163,7 +170,19 @@ export function Header({ variant = "default", activePath, disable = false }: Hea
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [terms, setTerms] = useState("");
 
-  const isMarketing = variant === "marketing";
+  const effectiveVariant: "default" | "marketing" | "panel" =
+  !user
+    ? "default"
+    : user.role === "administrator"
+      ? "panel"
+      : "marketing";
+  
+  const showMarketingNav =
+    effectiveVariant === "default" ||
+    effectiveVariant === "marketing";
+
+  const showSearch =
+    effectiveVariant === "marketing";
 
   useEffect(() => {
     let cancelled = false;
@@ -225,8 +244,8 @@ export function Header({ variant = "default", activePath, disable = false }: Hea
     }`;
 
   return (
-    <header className="site-header sticky top-0 z-20">
-      <div className={`header-inner ${isMarketing ? "header-inner--marketing" : ""}`}>
+    <header className="fixed site-header sticky top-0 z-20">
+      <div className="header-inner header-inner--marketing">
         <Link
           href="/"
           className="header-brand inline-flex shrink-0 items-center"
@@ -234,29 +253,39 @@ export function Header({ variant = "default", activePath, disable = false }: Hea
         >
           <Logo
             showWordmark
-            compactOnMobile={isMarketing}
-            size={isMarketing ? "md" : "sm"}
+            compactOnMobile={effectiveVariant !== "panel"}
+            size={effectiveVariant !== "panel" ? "md" : "sm"}
           />
         </Link>
 
-        {isMarketing ? (
-          <nav className="header-nav hidden items-center justify-center gap-8 lg:flex" aria-label="Principal">
+        {showMarketingNav ? (
+          <nav className="header-nav hidden items-center justify-center gap-8 lg:flex">
             <Link href="/" className={navClass("/")}>
               Inicio
             </Link>
+
             <Link href="/featured" className={navClass("/destacados")}>
               Destacados
             </Link>
+
             <Link href="/" className={navClass("/casos-de-exito")}>
               Casos de éxito
             </Link>
           </nav>
         ) : (
-          <div className="min-w-0 flex-1" aria-hidden="true" />
+          <nav className="header-nav hidden items-center justify-center gap-8 lg:flex">
+            <Link href="/" className={navClass("/")}>
+              Inicio
+            </Link>
+          </nav>
         )}
 
-        <div className={`header-end ${isMarketing ? "" : "shrink-0"}`}>
-          {isMarketing && (
+        <div
+          className={`header-end ${
+            effectiveVariant === "panel" ? "shrink-0" : ""
+          }`}
+        >
+          {showSearch && (
             <form
               onSubmit={handleSearchSubmit}
               className={`header-search-slot hidden shrink-0 xl:block ${disable ? "pointer-events-none" : ""}`}
@@ -285,15 +314,6 @@ export function Header({ variant = "default", activePath, disable = false }: Hea
             </form>
           )}
 
-          {!isMarketing && (
-            <Link
-              href="/"
-              className="hidden shrink-0 text-sm font-medium text-muted transition hover:text-foreground md:inline"
-            >
-              Inicio
-            </Link>
-          )}
-
           <div className="header-auth-slot" aria-busy={isLoading}>
             {isLoading ? (
               <AuthActionsSkeleton />
@@ -303,12 +323,13 @@ export function Header({ variant = "default", activePath, disable = false }: Hea
                 menuOpen={menuOpen}
                 menuRef={menuRef}
                 isLoggingOut={isLoggingOut}
+                variant={effectiveVariant}  
                 onToggleMenu={() => setMenuOpen((open) => !open)}
                 onLogout={handleLogout}
                 onCloseMenu={() => setMenuOpen(false)}
               />
             ) : (
-              <GuestAuthActions activePath={activePath} variant={variant} />
+              <GuestAuthActions activePath={activePath} variant="default" />
             )}
           </div>
         </div>
