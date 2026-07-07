@@ -1,11 +1,19 @@
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import func, select, update
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from src.infrastructure.db.models import Comment, Entry, EntryStatus, Reaction, ReactionType, Tag, User
-from src.modules.entries.categories import normalize_category
-from src.modules.entries.schemas import EntryCreate
+from src.infrastructure.db.models import (
+    Comment,
+    Entry,
+    EntryStatus,
+    Reaction,
+    ReactionType,
+    Tag,
+    User,
+)
+from src.modules.entries.categories import is_category, normalize_category
+from src.modules.entries.schemas import EntryCreate, EntryUpdate
 
 
 async def list_entries(
@@ -232,29 +240,49 @@ async def list_featured_entries(
     return entries, total
 
 
-async def delete_entry(
-        db: AsyncSession,
-        entry_id: int,
-):
-    await db.execute(
-        update(Entry)
-        .where(
-            Entry.id == entry_id,
-            Entry.status == EntryStatus.published   )
-        .values(status = EntryStatus.rejected,
-                deleted_at = datetime.now())
-        .returning(Entry) 
-    )
+async def update_entry(
+    db: AsyncSession,
+    *,
+    entry: Entry,
+    payload: EntryUpdate,
+) -> Entry:
+    """Edit an owned entry. Only provided fields are changed (RN-15, RN-19)."""
+    if payload.title is not None:
+        entry.title = payload.title.strip()
+    if payload.body is not None:
+        entry.body = payload.body.strip()
+
+    if payload.category_names is not None or payload.tags is not None:
+        current_categories = [tag.name for tag in entry.tags if is_category(tag.name)]
+        current_free_tags = [
+            tag.name for tag in entry.tags if not is_category(tag.name)
+        ]
+        entry.tags = await resolve_entry_tags(
+            db,
+            category_names=(
+                payload.category_names
+                if payload.category_names is not None
+                else current_categories
+            ),
+            free_tags=payload.tags if payload.tags is not None else current_free_tags,
+        )
+
+    entry.updated_at = datetime.now(UTC)
+    db.add(entry)
     await db.flush()
     result = await db.execute(
         select(Entry)
         .options(selectinload(Entry.author), selectinload(Entry.tags))
-        .where(
-            Entry.id == entry_id,
-            Entry.status == EntryStatus.rejected,
-        )
+        .where(Entry.id == entry.id)
     )
     return result.scalar_one()
+
+
+async def delete_entry(db: AsyncSession, entry: Entry) -> None:
+    """Soft-delete an owned entry so it disappears from every listing."""
+    entry.deleted_at = datetime.now(UTC)
+    db.add(entry)
+    await db.flush()
 
 async def list_all_entries(
     db: AsyncSession,

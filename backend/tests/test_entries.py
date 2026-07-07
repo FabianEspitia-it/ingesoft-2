@@ -177,9 +177,180 @@ async def test_create_entry_requires_title(auth_client: AsyncClient):
     assert response.status_code == 422
 
 
+async def _login_second_author(client: AsyncClient, db_session: AsyncSession) -> User:
+    """Create a second author, open a session and attach its cookie to client."""
+    author = User(
+        email="otro@unal.edu.co",
+        full_name="Otro Autor",
+        password=hash_password(TEST_PASSWORD),
+        affiliation=UserAffiliation.graduate,
+        role=UserRole.author,
+        email_verified=True,
+    )
+    db_session.add(author)
+    await db_session.commit()
+    await db_session.refresh(author)
+
+    token = "second-author-session-token"
+    db_session.add(
+        Session(
+            user_id=author.id,
+            token=token,
+            expires_at=datetime.now(UTC) + timedelta(hours=1),
+            is_active=True,
+        )
+    )
+    await db_session.commit()
+    client.cookies.set("session", token)
+    return author
+
+
+# ── Editar entrada (US Release 3) ──────────────────────────────────────────
+
+
 @pytest.mark.asyncio
-async def test_delete_entry_without_entry(auth_client: AsyncClient):
+async def test_update_entry_by_owner(auth_client: AsyncClient):
+    """El autor puede editar su propia entrada y se marca updated_at (RN-19)."""
+    create = await auth_client.post(
+        "/entries",
+        json={"title": "Título original", "body": "Cuerpo original"},
+    )
+    entry_id = create.json()["id"]
+
+    response = await auth_client.patch(
+        f"/entries/{entry_id}",
+        json={"title": "Título editado", "body": "Cuerpo editado"},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["title"] == "Título editado"
+    assert payload["body"] == "Cuerpo editado"
+    assert payload["updated_at"] is not None
+
+
+@pytest.mark.asyncio
+async def test_update_entry_requires_auth(
+    client: AsyncClient,
+    db_session: AsyncSession,
+    test_user: User,
+):
+    """Sin sesión no se puede editar una entrada (401)."""
+    entry = Entry(author_id=test_user.id, title="Entrada", body="Contenido")
+    db_session.add(entry)
+    await db_session.commit()
+    await db_session.refresh(entry)
+
+    response = await client.patch(
+        f"/entries/{entry.id}",
+        json={"title": "Hackeada"},
+    )
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_update_entry_non_owner_forbidden(
+    client: AsyncClient,
+    db_session: AsyncSession,
+    test_user: User,
+):
+    """Un autor distinto no puede editar entradas ajenas (403, RN-7)."""
+    entry = Entry(author_id=test_user.id, title="Entrada", body="Contenido")
+    db_session.add(entry)
+    await db_session.commit()
+    await db_session.refresh(entry)
+
+    await _login_second_author(client, db_session)
+    response = await client.patch(
+        f"/entries/{entry.id}",
+        json={"title": "Título ajeno"},
+    )
+    assert response.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_update_entry_not_found(auth_client: AsyncClient):
+    """Editar una entrada inexistente retorna 404."""
     response = await auth_client.patch(
         "/entries/9999999",
+        json={"title": "No existe"},
     )
     assert response.status_code == 404
+
+
+# ── Eliminar entrada (US Release 3) ────────────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_delete_entry_by_owner(auth_client: AsyncClient):
+    """El autor elimina su entrada (204) y deja de aparecer/leerse."""
+    create = await auth_client.post(
+        "/entries",
+        json={"title": "Para borrar", "body": "Contenido"},
+    )
+    entry_id = create.json()["id"]
+
+    response = await auth_client.delete(f"/entries/{entry_id}")
+    assert response.status_code == 204
+
+    detail = await auth_client.get(f"/entries/{entry_id}")
+    assert detail.status_code == 404
+
+    listing = await auth_client.get("/entries")
+    assert listing.json()["total"] == 0
+
+
+@pytest.mark.asyncio
+async def test_delete_entry_requires_auth(
+    client: AsyncClient,
+    db_session: AsyncSession,
+    test_user: User,
+):
+    """Sin sesión no se puede eliminar una entrada (401)."""
+    entry = Entry(author_id=test_user.id, title="Entrada", body="Contenido")
+    db_session.add(entry)
+    await db_session.commit()
+    await db_session.refresh(entry)
+
+    response = await client.delete(f"/entries/{entry.id}")
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_delete_entry_non_owner_forbidden(
+    client: AsyncClient,
+    db_session: AsyncSession,
+    test_user: User,
+):
+    """Un autor distinto no puede eliminar entradas ajenas (403, RN-7)."""
+    entry = Entry(author_id=test_user.id, title="Entrada", body="Contenido")
+    db_session.add(entry)
+    await db_session.commit()
+    await db_session.refresh(entry)
+
+    await _login_second_author(client, db_session)
+    response = await client.delete(f"/entries/{entry.id}")
+    assert response.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_delete_entry_not_found(auth_client: AsyncClient):
+    """Eliminar una entrada inexistente retorna 404."""
+    response = await auth_client.delete("/entries/9999999")
+    assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_admin_can_delete_any_entry(
+    client: AsyncClient,
+    db_session: AsyncSession,
+    test_user: User,
+):
+    """Un administrador puede moderar (eliminar) entradas de otros autores."""
+    entry = Entry(author_id=test_user.id, title="Entrada", body="Contenido")
+    db_session.add(entry)
+    await db_session.commit()
+    await db_session.refresh(entry)
+
+    await _login_admin(client, db_session)
+    response = await client.delete(f"/entries/{entry.id}")
+    assert response.status_code == 204

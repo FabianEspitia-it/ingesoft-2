@@ -58,6 +58,48 @@ class EntryCreate(BaseModel):
         return cleaned
 
 
+class EntryUpdate(BaseModel):
+    """Partial update of an owned entry (title, body, categories, tags)."""
+
+    title: str | None = Field(default=None, min_length=1, max_length=255)
+    body: str | None = Field(default=None, min_length=1)
+    category_names: list[str] | None = Field(default=None, max_length=MAX_CATEGORIES)
+    tags: list[str] | None = Field(default=None, max_length=MAX_TAGS)
+
+    @field_validator("category_names")
+    @classmethod
+    def validate_categories(cls, values: list[str] | None) -> list[str] | None:
+        if values is None:
+            return None
+        canonical: list[str] = []
+        for value in values:
+            canon = normalize_category(value)
+            if canon is None:
+                allowed = ", ".join(PREDEFINED_CATEGORIES)
+                raise ValueError(
+                    f"Categoría no válida: '{value}'. Debe ser una de: {allowed}."
+                )
+            canonical.append(canon)
+        return canonical
+
+    @field_validator("tags")
+    @classmethod
+    def validate_tags(cls, values: list[str] | None) -> list[str] | None:
+        if values is None:
+            return None
+        cleaned: list[str] = []
+        for value in values:
+            name = value.strip()
+            if not name:
+                continue
+            if len(name) > MAX_TAG_LENGTH:
+                raise ValueError(
+                    f"Cada etiqueta debe tener máximo {MAX_TAG_LENGTH} caracteres."
+                )
+            cleaned.append(name)
+        return cleaned
+
+
 class EntrySummary(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -137,7 +179,7 @@ class FeaturedEntrySummary(BaseModel):
     tags: list[str] = Field(default_factory=list)
 
     @classmethod
-    def from_entry(cls, entry, likes: int, comments_count: int) -> "FeaturedEntrySummary":
+    def from_entry(cls, entry, likes: int, comments_count: int) -> FeaturedEntrySummary:
         return cls(
             id=entry.id,
             title=entry.title,

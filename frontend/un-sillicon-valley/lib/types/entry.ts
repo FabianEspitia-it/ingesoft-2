@@ -35,6 +35,13 @@ export type EntryCreatePayload = {
   tags?: string[];
 };
 
+export type EntryUpdatePayload = {
+  title?: string;
+  body?: string;
+  category_names?: string[];
+  tags?: string[];
+};
+
 export type ReactionSummary = {
   likes: number;
   dislikes: number;

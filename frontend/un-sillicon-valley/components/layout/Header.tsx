@@ -138,6 +138,14 @@ function UserAuthActions({
               Crear entrada
             </Link>
             <Link
+              href={`/user/${user.id}`}
+              role="menuitem"
+              className="header-menu-item"
+              onClick={onCloseMenu}
+            >
+              Ver mi perfil
+            </Link>
+            <Link
               href="/user/edit"
               role="menuitem"
               className="header-menu-item sm:hidden"

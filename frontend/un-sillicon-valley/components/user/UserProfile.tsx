@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Icon, RiImage2Line, RiMailCheckLine, RiQuillPenLine } from "@/components/icons";
-import { AFFILIATION_LABELS, type User } from "@/lib/types/user";
-import type { Project } from "@/lib/types/project";
-import type { EntrySummary } from "@/lib/types/entry";
-import { getEntriesByAuthor, getMyProjects, getUserById } from "@/lib/api";
 import { EntryCard } from "@/components/entries/EntryCard";
+import { MyEntriesList } from "@/components/entries/MyEntriesList";
+import { Icon, RiImage2Line, RiMailCheckLine, RiQuillPenLine } from "@/components/icons";
+import { getCurrentUser, getEntriesByAuthor, getMyProjects, getUserById } from "@/lib/api";
+import type { EntrySummary } from "@/lib/types/entry";
+import type { Project } from "@/lib/types/project";
+import { AFFILIATION_LABELS, type User } from "@/lib/types/user";
+import { useEffect, useState } from "react";
 
 function getInitial(name: string) {
   return (name.trim()[0] ?? "?").toUpperCase();
@@ -14,9 +15,7 @@ function getInitial(name: string) {
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-subtle">
-      {children}
-    </h2>
+    <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-subtle">{children}</h2>
   );
 }
 
@@ -58,6 +57,7 @@ export function UserProfile({ userId }: Props) {
   const [user, setUser] = useState<User | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [entries, setEntries] = useState<EntrySummary[]>([]);
+  const [isOwner, setIsOwner] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -73,15 +73,17 @@ export function UserProfile({ userId }: Props) {
       }
 
       try {
-        const [userData, projectsData, entriesData] = await Promise.all([
+        const [userData, projectsData, entriesData, currentUser] = await Promise.all([
           getUserById(numericUserId),
           getMyProjects(numericUserId),
           getEntriesByAuthor(numericUserId),
+          getCurrentUser(),
         ]);
         if (cancelled) return;
         setUser(userData);
         setProjects(projectsData.items);
         setEntries(entriesData.items);
+        setIsOwner(currentUser?.id === numericUserId);
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : "No se pudo cargar este perfil.");
@@ -166,10 +168,12 @@ export function UserProfile({ userId }: Props) {
         <SectionTitle>
           <span className="inline-flex items-center gap-2">
             <Icon icon={RiQuillPenLine} size={14} />
-            Entradas publicadas
+            {isOwner ? "Mis publicaciones" : "Entradas publicadas"}
           </span>
         </SectionTitle>
-        {entries.length === 0 ? (
+        {isOwner ? (
+          <MyEntriesList authorId={numericUserId} />
+        ) : entries.length === 0 ? (
           <p className="text-sm text-subtle">Este usuario aún no ha publicado entradas.</p>
         ) : (
           <div className="space-y-3">
