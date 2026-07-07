@@ -3,14 +3,21 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { createEntry, getCategories } from "@/lib/api";
+import { createEntry, getCategories, updateEntry } from "@/lib/api";
+import type { EntryDetail } from "@/lib/types/entry";
 
-export function EntryForm() {
+type EntryFormProps = {
+  entry?: EntryDetail;
+};
+
+export function EntryForm({ entry }: EntryFormProps) {
   const router = useRouter();
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
+  const isEdit = entry !== undefined;
+
+  const [title, setTitle] = useState(entry?.title ?? "");
+  const [body, setBody] = useState(entry?.body ?? "");
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(entry?.categories ?? []);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -42,14 +49,27 @@ export function EntryForm() {
     setIsSubmitting(true);
 
     try {
-      const entry = await createEntry({
-        title,
-        body,
-        category_names: selectedCategories,
-      });
-      router.push(`/entries/${entry.id}`);
+      const saved = isEdit
+        ? await updateEntry(entry.id, {
+            title,
+            body,
+            category_names: selectedCategories,
+          })
+        : await createEntry({
+            title,
+            body,
+            category_names: selectedCategories,
+          });
+      router.push(`/entries/${saved.id}`);
+      router.refresh();
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "No se pudo crear la entrada.");
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : isEdit
+            ? "No se pudo guardar la entrada."
+            : "No se pudo crear la entrada.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -117,12 +137,14 @@ export function EntryForm() {
       )}
 
       <div className="flex items-center gap-3">
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="ds-btn ds-btn-primary ds-btn-pill"
-        >
-          {isSubmitting ? "Publicando..." : "Publicar entrada"}
+        <button type="submit" disabled={isSubmitting} className="ds-btn ds-btn-primary ds-btn-pill">
+          {isSubmitting
+            ? isEdit
+              ? "Guardando..."
+              : "Publicando..."
+            : isEdit
+              ? "Guardar cambios"
+              : "Publicar entrada"}
         </button>
       </div>
     </form>

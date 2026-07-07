@@ -9,6 +9,7 @@ from src.modules.entries.schemas import (
     EntryDetail,
     EntryListResponse,
     EntrySummary,
+    EntryUpdate,
     FeaturedEntryResponse,
     FeaturedEntrySummary,
     SuccessCaseUpdate,
@@ -108,39 +109,53 @@ async def create_entry(
     entry = await crud.create_entry(db, author=current_user, payload=payload)
     return EntryDetail.from_entry(entry)
 
-@entries_router.patch("/{entry_id}",
-    response_model=EntryDetail
-)
-async def delete_entry(
+def _ensure_can_manage(entry, current_user: User) -> None:
+    """Only the author or an administrator may edit/delete an entry (RN-7)."""
+    if (
+        entry.author_id != current_user.id
+        and current_user.role != UserRole.administrator
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="No tienes permiso para modificar esta entrada.",
+        )
+
+
+@entries_router.patch("/{entry_id}", response_model=EntryDetail)
+async def update_entry(
     entry_id: int,
+    payload: EntryUpdate,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
+    """Edit an owned entry: title, body, categories and tags (RN-15, RN-19)."""
     entry = await crud.get_entry_by_id(db, entry_id)
     if entry is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Entrada no encontrada.",
         )
-    updated_entry = await crud.delete_entry(db, entry_id=entry_id)
-    
+    _ensure_can_manage(entry, current_user)
+    updated_entry = await crud.update_entry(db, entry=entry, payload=payload)
     return EntryDetail.from_entry(updated_entry)
 
-@entries_router.patch("/{entry_id}",
-    response_model=EntryDetail
-)
+
+@entries_router.delete("/{entry_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_entry(
     entry_id: int,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
+    """Soft-delete an owned entry (author or administrator)."""
     entry = await crud.get_entry_by_id(db, entry_id)
     if entry is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Entrada no encontrada.",
         )
-    updated_entry = await crud.delete_entry(db, entry_id=entry_id)
-    
-    return EntryDetail.from_entry(updated_entry)
+    _ensure_can_manage(entry, current_user)
+    await crud.delete_entry(db, entry)
+
 
 @entries_router.get("/all/", response_model=EntryListResponse)
 async def list_all_entries(

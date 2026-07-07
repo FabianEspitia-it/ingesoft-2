@@ -1,4 +1,3 @@
-import type { EntryCreatePayload, EntryDetail, EntryListResponse, FeaturedEntryResponse, ReactionSummary } from "@/lib/types/entry";
 import type {
   Comment,
   CommentCreatePayload,
@@ -6,20 +5,29 @@ import type {
   CommentUpdatePayload,
 } from "@/lib/types/comment";
 import type {
-  LoginPayload,
-  MessageResponse,
-  RegisterPayload,
-  UpdateUserPayload,
-  User,
-} from "@/lib/types/user";
+  EntryCreatePayload,
+  EntryDetail,
+  EntryListResponse,
+  EntryUpdatePayload,
+  FeaturedEntryResponse,
+  ReactionSummary,
+} from "@/lib/types/entry";
 import type {
   CreateProjectPayload,
   Project,
   ProjectListResponse,
   UpdateProjectPayload,
 } from "@/lib/types/project";
+import type {
+  LoginPayload,
+  MessageResponse,
+  RegisterPayload,
+  UpdateUserPayload,
+  User,
+} from "@/lib/types/user";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://un-silicon-valley-236517281359.us-central1.run.app";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "https://un-silicon-valley-236517281359.us-central1.run.app";
 
 type ApiOptions = RequestInit & {
   json?: unknown;
@@ -96,10 +104,7 @@ export function getComments(entryId: number): Promise<CommentListResponse> {
   return apiFetch<CommentListResponse>(`/entries/${entryId}/comments`);
 }
 
-export function createComment(
-  entryId: number,
-  payload: CommentCreatePayload,
-): Promise<Comment> {
+export function createComment(entryId: number, payload: CommentCreatePayload): Promise<Comment> {
   return apiFetch<Comment>(`/entries/${entryId}/comments`, {
     method: "POST",
     json: payload,
@@ -117,10 +122,7 @@ export function updateComment(
   });
 }
 
-export function deleteComment(
-  entryId: number,
-  commentId: number,
-): Promise<void> {
+export function deleteComment(entryId: number, commentId: number): Promise<void> {
   return apiFetch<void>(`/entries/${entryId}/comments/${commentId}`, {
     method: "DELETE",
   });
@@ -215,25 +217,28 @@ export function deleteProject(id: number): Promise<void> {
   });
 }
 
-export function deleteEntry(entry_id: number): Promise<EntryDetail> {
-  return apiFetch<EntryDetail>(`/entries/${entry_id}`, {
+export function updateEntry(id: number, payload: EntryUpdatePayload): Promise<EntryDetail> {
+  return apiFetch<EntryDetail>(`/entries/${id}`, {
     method: "PATCH",
+    json: payload,
+  });
+}
+
+export function deleteEntry(entry_id: number): Promise<void> {
+  return apiFetch<void>(`/entries/${entry_id}`, {
+    method: "DELETE",
   });
 }
 
 export function getAllEntries(): Promise<EntryListResponse> {
-  return apiFetch<EntryListResponse>(`/entries/all/`, {
-  });
+  return apiFetch<EntryListResponse>(`/entries/all/`, {});
 }
 
 export function getAllComments(): Promise<CommentListResponse> {
-  return apiFetch<CommentListResponse>(`/entries/{entry_id}/comments/all/`, {
-  });
+  return apiFetch<CommentListResponse>(`/entries/{entry_id}/comments/all/`, {});
 }
 
-export function deleteCommentById(
-  commentId: number,
-): Promise<void> {
+export function deleteCommentById(commentId: number): Promise<void> {
   return apiFetch<void>(`/entries/{entryId}/comments/delete/${commentId}`, {
     method: "DELETE",
   });
