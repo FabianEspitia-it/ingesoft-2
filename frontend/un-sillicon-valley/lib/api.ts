@@ -215,4 +215,10 @@ export function deleteProject(id: number): Promise<void> {
   });
 }
 
+export function deleteEntry(entry_id: number): Promise<EntryDetail> {
+  return apiFetch<EntryDetail>(`/entries/${entry_id}`, {
+    method: "PATCH",
+  });
+}
+
 export { API_URL };

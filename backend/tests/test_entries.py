@@ -175,3 +175,11 @@ async def test_create_entry_requires_title(auth_client: AsyncClient):
         json={"title": "", "body": "Contenido"},
     )
     assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_delete_entry_without_entry(auth_client: AsyncClient):
+    response = await auth_client.patch(
+        "/entries/9999999",
+    )
+    assert response.status_code == 404

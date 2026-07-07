@@ -1,6 +1,10 @@
+"use client"
 import Link from "next/link";
 
 import { AFFILIATION_LABELS, type EntrySummary, formatPublishedDate } from "@/lib/types/entry";
+import { getCurrentUser } from "@/lib/api";
+import { useEffect, useState } from "react";
+import { deleteEntry } from "@/lib/api";
 
 type EntryCardProps = {
   entry: EntrySummary;
@@ -8,6 +12,30 @@ type EntryCardProps = {
 
 export function EntryCard({ entry }: EntryCardProps) {
   const affiliation = AFFILIATION_LABELS[entry.author.affiliation] ?? entry.author.affiliation;
+  const [isDeletable, setIsDeletable] = useState(false)
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() =>{
+    async function checkDeletable(){
+      const currentUser = await getCurrentUser()
+
+      const segments = window.location.pathname
+        .split("/")
+        .filter(Boolean)
+
+      if (segments[0] == "user" && 
+          segments[1] == currentUser?.id.toString())
+          setIsDeletable(true)
+          setLoading(false)
+    }
+
+    checkDeletable()
+    }, []);
+
+    async function handleDeleteEntry(){
+    await deleteEntry(entry.id)
+    location.reload();
+    }
 
   return (
     <article className="ds-card group p-6 transition hover:border-primary/30">
@@ -46,6 +74,11 @@ export function EntryCard({ entry }: EntryCardProps) {
           ))}
         </div>
       )}
+      {isDeletable && (<div className="mt-3 flex flex-wrap gap-2">
+          <button type="submit" className="ds-btn ds-btn-primary ds-btn-pill min-w-0 flex-1" onClick={handleDeleteEntry}>
+            Borrar
+          </button>
+        </div>)}
     </article>
   );
 }

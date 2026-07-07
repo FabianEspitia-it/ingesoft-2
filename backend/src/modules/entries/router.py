@@ -107,3 +107,20 @@ async def create_entry(
     """Create a blog entry (requires authenticated author)."""
     entry = await crud.create_entry(db, author=current_user, payload=payload)
     return EntryDetail.from_entry(entry)
+
+@entries_router.patch("/{entry_id}",
+    response_model=EntryDetail
+)
+async def delete_entry(
+    entry_id: int,
+    db: AsyncSession = Depends(get_db),
+):
+    entry = await crud.get_entry_by_id(db, entry_id)
+    if entry is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Entrada no encontrada.",
+        )
+    updated_entry = await crud.delete_entry(db, entry_id=entry_id)
+    
+    return EntryDetail.from_entry(updated_entry)

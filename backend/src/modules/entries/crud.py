@@ -1,6 +1,6 @@
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from src.infrastructure.db.models import Comment, Entry, EntryStatus, Reaction, ReactionType, Tag, User
@@ -230,3 +230,28 @@ async def list_featured_entries(
         })
 
     return entries, total
+
+
+async def delete_entry(
+        db: AsyncSession,
+        entry_id: int,
+):
+    await db.execute(
+        update(Entry)
+        .where(
+            Entry.id == entry_id,
+            Entry.status == EntryStatus.published   )
+        .values(status = EntryStatus.rejected,
+                deleted_at = datetime.now())
+        .returning(Entry) 
+    )
+    await db.flush()
+    result = await db.execute(
+        select(Entry)
+        .options(selectinload(Entry.author), selectinload(Entry.tags))
+        .where(
+            Entry.id == entry_id,
+            Entry.status == EntryStatus.rejected,
+        )
+    )
+    return result.scalar_one()
