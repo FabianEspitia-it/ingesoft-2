@@ -124,3 +124,38 @@ async def delete_entry(
     updated_entry = await crud.delete_entry(db, entry_id=entry_id)
     
     return EntryDetail.from_entry(updated_entry)
+
+@entries_router.patch("/{entry_id}",
+    response_model=EntryDetail
+)
+async def delete_entry(
+    entry_id: int,
+    db: AsyncSession = Depends(get_db),
+):
+    entry = await crud.get_entry_by_id(db, entry_id)
+    if entry is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Entrada no encontrada.",
+        )
+    updated_entry = await crud.delete_entry(db, entry_id=entry_id)
+    
+    return EntryDetail.from_entry(updated_entry)
+
+@entries_router.get("/all/", response_model=EntryListResponse)
+async def list_all_entries(
+    db: AsyncSession = Depends(get_db),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=MAX_PAGE_SIZE),
+):
+    entries, total = await crud.list_all_entries(
+        db,
+        page=page,
+        page_size=page_size,
+    )
+    return EntryListResponse(
+        items=[EntrySummary.from_entry(entry) for entry in entries],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )

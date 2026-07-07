@@ -221,4 +221,22 @@ export function deleteEntry(entry_id: number): Promise<EntryDetail> {
   });
 }
 
+export function getAllEntries(): Promise<EntryListResponse> {
+  return apiFetch<EntryListResponse>(`/entries/all/`, {
+  });
+}
+
+export function getAllComments(): Promise<CommentListResponse> {
+  return apiFetch<CommentListResponse>(`/entries/{entry_id}/comments/all/`, {
+  });
+}
+
+export function deleteCommentById(
+  commentId: number,
+): Promise<void> {
+  return apiFetch<void>(`/entries/{entryId}/comments/delete/${commentId}`, {
+    method: "DELETE",
+  });
+}
+
 export { API_URL };

@@ -113,3 +113,38 @@ async def delete_comment(
             detail="Solo puedes eliminar tus propios comentarios.",
         )
     await crud.delete_comment(db, comment_id)
+
+@comments_router.get(
+    "/all/", 
+    response_model=CommentListResponse)
+async def list_all_comments(
+    db: AsyncSession = Depends(get_db),
+):
+    """US: List the comments of an entry, newest first."""
+    comments, total = await crud.list_all_comments(db)
+    if comments is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Comentarios no encontrados.",
+        )
+    return CommentListResponse(
+        items=[CommentResponse.model_validate(c) for c in comments],
+        total=total,
+    )
+
+@comments_router.delete(
+    "/delete/{comment_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def delete_comment(
+    comment_id: int,
+    db: AsyncSession = Depends(get_db),
+):
+    comment = await crud.get_comment_by_id(db, comment_id)
+    if comment is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Comentario no encontrado.",
+        )
+
+    await crud.delete_comment(db, comment_id)

@@ -255,3 +255,29 @@ async def delete_entry(
         )
     )
     return result.scalar_one()
+
+async def list_all_entries(
+    db: AsyncSession,
+    *,
+    page: int = 1,
+    page_size: int = 20,
+) -> tuple[list[Entry], int]:
+    offset = (page - 1) * page_size
+    filters = [
+        Entry.deleted_at.is_(None),
+        Entry.status == EntryStatus.published,
+    ]
+    
+    count_result = await db.execute(
+        select(func.count()).select_from(Entry).where(*filters)
+    )
+    total = count_result.scalar_one()
+    result = await db.execute(
+        select(Entry)
+        .options(selectinload(Entry.author), selectinload(Entry.tags))
+        .where(*filters)
+        .order_by(Entry.published_at.desc())
+        .offset(offset)
+        .limit(page_size)
+    )
+    return list(result.scalars().all()), total

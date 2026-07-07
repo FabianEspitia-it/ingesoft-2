@@ -78,3 +78,19 @@ async def update_comment(
 async def delete_comment(db: AsyncSession, comment_id: int) -> None:
     await db.execute(delete(Comment).where(Comment.id == comment_id))
     await db.flush()
+
+async def list_all_comments(
+    db: AsyncSession,
+) -> tuple[list[Comment], int]:
+    """List an entry's comments, newest first (descending by published_at)."""
+    count_result = await db.execute(
+        select(func.count()).select_from(Comment)
+    )
+    total = count_result.scalar_one()
+
+    result = await db.execute(
+        select(Comment)
+        .options(selectinload(Comment.author))
+        .order_by(Comment.published_at.desc(), Comment.id.desc())
+    )
+    return list(result.scalars().all()), total       

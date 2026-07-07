@@ -23,8 +23,9 @@ export function EntryCard({ entry }: EntryCardProps) {
         .split("/")
         .filter(Boolean)
 
-      if (segments[0] == "user" && 
-          segments[1] == currentUser?.id.toString())
+      if ((segments[0] == "user" && 
+          segments[1] == currentUser?.id.toString()) ||
+          segments[0] == "admin")
           setIsDeletable(true)
           setLoading(false)
     }

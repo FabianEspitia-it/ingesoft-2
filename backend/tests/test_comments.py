@@ -172,3 +172,20 @@ async def test_delete_nonexistent_comment_returns_404(auth_client: AsyncClient):
         f"/entries/{entry_id}/comments/9999"
     )
     assert response.status_code == 404
+
+@pytest.mark.asyncio
+async def test_get_all_comments(auth_client: AsyncClient):
+    """Verifica que se carguen todos los comentarios"""
+    response = await auth_client.get(
+        "/entries/%7Bentry_id%7D/comments/all/"   
+    )
+    assert response.status_code == 200
+
+@pytest.mark.asyncio
+async def test_delete_nonexistent_comment_by_id(auth_client: AsyncClient):
+    """Verifica que se elimine un comentario por id"""
+    response = await auth_client.delete(
+        "/entries/%7BentryId%7D/comments/delete/99999"
+    )
+    assert response.status_code == 404
+
