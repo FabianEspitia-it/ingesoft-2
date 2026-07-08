@@ -10,18 +10,20 @@ export default function SearchResults() {
   const displayQuery = searchTerms.get("title") || searchTerms.get("terms") || searchTerms.get("tag") || "";
 
   const [results, setResults] = useState<EntryListResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(!!query);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!query) {
       setResults(null);
+      setIsLoading(false);
       return;
     }
 
     let cancelled = false;
     setIsLoading(true);
     setError(null);
+    setResults(null);
 
     async function fetchData() {
       try {
@@ -62,7 +64,7 @@ export default function SearchResults() {
       )}
 
       {isLoading && (
-        <p className="text-sm text-muted" aria-live="polite">Buscando\u2026</p>
+        <p className="text-sm text-muted" aria-live="polite">Buscando…</p>
       )}
 
       {!isLoading && results && results.items.length > 0 && (

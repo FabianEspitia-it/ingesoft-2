@@ -1,12 +1,31 @@
-import Link from "next/link";
+"use client";
 
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
+import { getCurrentUser } from "@/lib/api";
 import type { EntrySummary } from "@/lib/types/entry";
+import type { User } from "@/lib/types/user";
 
 type HomeSidebarProps = {
   successCases: EntrySummary[];
 };
 
 export function HomeSidebar({ successCases }: HomeSidebarProps) {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    getCurrentUser().then((u) => {
+      if (!cancelled) {
+        setUser(u);
+        setIsLoading(false);
+      }
+    });
+    return () => { cancelled = true; };
+  }, []);
+
   return (
     <aside aria-label="Contenido complementario" className="flex flex-col gap-6">
       <section className="ds-card p-5" aria-labelledby="sidebar-success-heading">
@@ -39,18 +58,37 @@ export function HomeSidebar({ successCases }: HomeSidebarProps) {
       </section>
 
       <section className="ds-card p-5" aria-labelledby="sidebar-cta-heading">
-        <h2 id="sidebar-cta-heading" className="mb-2 text-sm font-bold text-foreground">
-          ¿Tienes algo que contar?
-        </h2>
-        <p className="mb-4 text-xs leading-relaxed text-muted">
-          Únete con tu correo @unal.edu.co y publica tu primera entrada.
-        </p>
-        <Link
-          href="/register"
-          className="ds-btn ds-btn-primary w-full justify-center py-2.5 text-sm"
-        >
-          Crear cuenta
-        </Link>
+        {!isLoading && user ? (
+          <>
+            <h2 id="sidebar-cta-heading" className="mb-2 text-sm font-bold text-foreground">
+              ¿Tienes algo que contar?
+            </h2>
+            <p className="mb-4 text-xs leading-relaxed text-muted">
+              Comparte tu experiencia con la comunidad UNAL.
+            </p>
+            <Link
+              href="/entries/new"
+              className="ds-btn ds-btn-primary w-full justify-center py-2.5 text-sm"
+            >
+              Crear entrada
+            </Link>
+          </>
+        ) : (
+          <>
+            <h2 id="sidebar-cta-heading" className="mb-2 text-sm font-bold text-foreground">
+              ¿Tienes algo que contar?
+            </h2>
+            <p className="mb-4 text-xs leading-relaxed text-muted">
+              Únete con tu correo @unal.edu.co y publica tu primera entrada.
+            </p>
+            <Link
+              href="/register"
+              className="ds-btn ds-btn-primary w-full justify-center py-2.5 text-sm"
+            >
+              Crear cuenta
+            </Link>
+          </>
+        )}
       </section>
     </aside>
   );
