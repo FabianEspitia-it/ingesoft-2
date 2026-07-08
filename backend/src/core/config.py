@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     # Service Account credentials para GCP (Storage signing)
     GCP_SERVICE_ACCOUNT_EMAIL: str = Field(default="")
     GCP_SERVICE_ACCOUNT_PRIVATE_KEY: str = Field(default="")
+    # Cloud Storage bucket for entry cover images
+    GCS_BUCKET_NAME: str = Field(default="")
 
     # PostgreSQL Database (Cloud SQL)
     DATABASE_HOST: str = Field(default="localhost")

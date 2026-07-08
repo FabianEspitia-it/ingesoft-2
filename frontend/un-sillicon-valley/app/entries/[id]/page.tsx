@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { CommentSection } from "@/components/comments/CommentSection";
+import { EntryEditButton } from "@/components/entries/EntryEditButton";
 import { ReactionBar } from "@/components/entries/ReactionBar";
 import { SuccessCaseToggle } from "@/components/entries/SuccessCaseToggle";
 import { Header } from "@/components/layout/Header";
@@ -33,11 +34,22 @@ export default async function EntryDetailPage({ params }: EntryDetailPageProps) 
     <div className="min-h-screen bg-background">
       <Header />
       <main className="mx-auto max-w-3xl px-6 py-10">
-        <Link href="/" className="text-sm font-medium text-primary hover:underline">
-          ← Volver al inicio
-        </Link>
+        <div className="flex items-center justify-between gap-3">
+          <Link href="/" className="text-sm font-medium text-primary hover:underline">
+            ← Volver al inicio
+          </Link>
+          <EntryEditButton entryId={entry.id} authorId={entry.author.id} />
+        </div>
 
         <article className="ds-card mt-6 p-8">
+          {entry.cover_image_url && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={entry.cover_image_url}
+              alt={`Portada de ${entry.title}`}
+              className="mb-6 max-h-96 w-full rounded-2xl object-cover"
+            />
+          )}
           {entry.is_success_case && (
             <span className="mb-3 inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">
               ⭐ Caso de éxito

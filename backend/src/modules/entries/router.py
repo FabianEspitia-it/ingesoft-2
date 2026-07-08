@@ -1,10 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.api.dependencies import get_current_user, require_role
 from src.infrastructure.db.database import get_db
 from src.infrastructure.db.models import User, UserRole
+from src.infrastructure.storage.gcs import (
+    StorageNotConfiguredError,
+    signed_cover_url,
+    upload_cover_image,
+)
 from src.modules.entries import crud
 from src.modules.entries.schemas import (
+    CoverImageResponse,
     EntryCreate,
     EntryDetail,
     EntryListResponse,
@@ -17,6 +23,8 @@ from src.modules.entries.schemas import (
 
 entries_router = APIRouter(prefix="/entries", tags=["Entries"])
 MAX_PAGE_SIZE = 20
+MAX_COVER_IMAGE_BYTES = 5 * 1024 * 1024  # 5 MB (RN: cover image <=5MB)
+ALLOWED_COVER_IMAGE_TYPES = {"image/jpeg", "image/png"}
 
 
 @entries_router.get("/featured", response_model=FeaturedEntryResponse)
@@ -108,6 +116,47 @@ async def create_entry(
     """Create a blog entry (requires authenticated author)."""
     entry = await crud.create_entry(db, author=current_user, payload=payload)
     return EntryDetail.from_entry(entry)
+
+
+@entries_router.post("/cover-image", response_model=CoverImageResponse)
+async def upload_cover_image_endpoint(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+):
+    """Upload a JPG/PNG cover image (<=5MB) and return its public URL."""
+    if file.content_type not in ALLOWED_COVER_IMAGE_TYPES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La imagen debe ser JPG o PNG.",
+        )
+
+    data = await file.read()
+    if len(data) > MAX_COVER_IMAGE_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La imagen no debe superar 5MB.",
+        )
+    if not data:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El archivo está vacío.",
+        )
+
+    try:
+        object_path = upload_cover_image(data=data, content_type=file.content_type)
+    except StorageNotConfiguredError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="El almacenamiento de imágenes no está configurado.",
+        ) from None
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="No se pudo subir la imagen. Inténtalo de nuevo.",
+        ) from None
+
+    return CoverImageResponse(path=object_path, url=signed_cover_url(object_path))
+
 
 def _ensure_can_manage(entry, current_user: User) -> None:
     """Only the author or an administrator may edit/delete an entry (RN-7)."""

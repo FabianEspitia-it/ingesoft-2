@@ -5,6 +5,7 @@ import type {
   CommentUpdatePayload,
 } from "@/lib/types/comment";
 import type {
+  CoverImageResponse,
   EntryCreatePayload,
   EntryDetail,
   EntryListResponse,
@@ -86,6 +87,15 @@ export function createEntry(payload: EntryCreatePayload): Promise<EntryDetail> {
   return apiFetch<EntryDetail>("/entries", {
     method: "POST",
     json: payload,
+  });
+}
+
+export function uploadCoverImage(file: File): Promise<CoverImageResponse> {
+  const formData = new FormData();
+  formData.append("file", file);
+  return apiFetch<CoverImageResponse>("/entries/cover-image", {
+    method: "POST",
+    body: formData,
   });
 }
 

@@ -18,7 +18,10 @@ export type EntrySummary = {
 export type EntryDetail = EntrySummary & {
   body: string;
   updated_at: string | null;
+  /** Object path stored on the entry (used to round-trip on edit). */
   cover_image: string | null;
+  /** Short-lived signed URL for displaying the cover image. */
+  cover_image_url: string | null;
 };
 
 export type EntryListResponse = {
@@ -31,6 +34,7 @@ export type EntryListResponse = {
 export type EntryCreatePayload = {
   title: string;
   body: string;
+  cover_image?: string | null;
   category_names?: string[];
   tags?: string[];
 };
@@ -38,8 +42,16 @@ export type EntryCreatePayload = {
 export type EntryUpdatePayload = {
   title?: string;
   body?: string;
+  cover_image?: string | null;
   category_names?: string[];
   tags?: string[];
+};
+
+export type CoverImageResponse = {
+  /** Object path to persist as the entry's cover_image. */
+  path: string;
+  /** Short-lived signed URL for previewing the just-uploaded image. */
+  url: string | null;
 };
 
 export type ReactionSummary = {

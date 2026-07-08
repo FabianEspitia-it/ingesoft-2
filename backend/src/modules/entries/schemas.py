@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+from src.infrastructure.storage.gcs import signed_cover_url
 from src.modules.entries.categories import (
     PREDEFINED_CATEGORIES,
     is_category,
@@ -12,6 +13,7 @@ from src.modules.entries.categories import (
 MAX_TAG_LENGTH = 100
 MAX_TAGS = 20
 MAX_CATEGORIES = 10
+MAX_COVER_IMAGE_URL_LENGTH = 500
 
 
 class AuthorSummary(BaseModel):
@@ -25,6 +27,9 @@ class AuthorSummary(BaseModel):
 class EntryCreate(BaseModel):
     title: str = Field(min_length=1, max_length=255)
     body: str = Field(min_length=1)
+    cover_image: str | None = Field(
+        default=None, max_length=MAX_COVER_IMAGE_URL_LENGTH
+    )
     category_names: list[str] = Field(default_factory=list, max_length=MAX_CATEGORIES)
     tags: list[str] = Field(default_factory=list, max_length=MAX_TAGS)
 
@@ -63,6 +68,9 @@ class EntryUpdate(BaseModel):
 
     title: str | None = Field(default=None, min_length=1, max_length=255)
     body: str | None = Field(default=None, min_length=1)
+    cover_image: str | None = Field(
+        default=None, max_length=MAX_COVER_IMAGE_URL_LENGTH
+    )
     category_names: list[str] | None = Field(default=None, max_length=MAX_CATEGORIES)
     tags: list[str] | None = Field(default=None, max_length=MAX_TAGS)
 
@@ -137,6 +145,7 @@ class EntryDetail(BaseModel):
     view_count: int
     is_success_case: bool = False
     cover_image: str | None
+    cover_image_url: str | None
     author: AuthorSummary
     categories: list[str] = Field(default_factory=list)
     tags: list[str] = Field(default_factory=list)
@@ -152,6 +161,7 @@ class EntryDetail(BaseModel):
             view_count=entry.view_count,
             is_success_case=entry.is_success_case,
             cover_image=entry.cover_image,
+            cover_image_url=signed_cover_url(entry.cover_image),
             author=AuthorSummary.model_validate(entry.author),
             categories=_categories_of(entry),
             tags=_free_tags_of(entry),
@@ -204,6 +214,17 @@ class SuccessCaseUpdate(BaseModel):
     """Admin toggle to (un)feature an entry as a success case (RN-23)."""
 
     is_success_case: bool
+
+
+class CoverImageResponse(BaseModel):
+    """Result of a cover-image upload.
+
+    ``path`` is the object path to persist on the entry; ``url`` is a short-lived
+    signed URL for previewing the image immediately in the form.
+    """
+
+    path: str
+    url: str | None
 
 
 def _categories_of(entry) -> list[str]:

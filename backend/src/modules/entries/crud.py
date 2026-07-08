@@ -134,6 +134,7 @@ async def create_entry(
         author_id=author.id,
         title=payload.title.strip(),
         body=payload.body.strip(),
+        cover_image=payload.cover_image,
         status=EntryStatus.published,
     )
     entry.tags = tags
@@ -251,6 +252,8 @@ async def update_entry(
         entry.title = payload.title.strip()
     if payload.body is not None:
         entry.body = payload.body.strip()
+    if payload.cover_image is not None:
+        entry.cover_image = payload.cover_image
 
     if payload.category_names is not None or payload.tags is not None:
         current_categories = [tag.name for tag in entry.tags if is_category(tag.name)]
