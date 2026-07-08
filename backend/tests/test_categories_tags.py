@@ -49,13 +49,13 @@ async def test_categories_reused_across_entries(auth_client: AsyncClient):
     """Verifica que las categorías se reutilizan entre entradas sin duplicarlas (resolución case-insensitive)."""
     first = await auth_client.post(
         "/entries",
-        json={"title": "A", "body": "x", "category_names": ["Emprendimiento"]},
+        json={"title": "A", "body": "x", "category_names": ["Producto Digital"]},
     )
     second = await auth_client.post(
         "/entries",
-        json={"title": "B", "body": "y", "category_names": ["emprendimiento"]},
+        json={"title": "B", "body": "y", "category_names": ["producto digital"]},
     )
     assert first.status_code == 201
     assert second.status_code == 201
-    assert first.json()["categories"] == ["Emprendimiento"]
-    assert second.json()["categories"] == ["Emprendimiento"]
+    assert first.json()["categories"] == ["Producto Digital"]
+    assert second.json()["categories"] == ["Producto Digital"]

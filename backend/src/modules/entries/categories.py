@@ -15,10 +15,12 @@ from fastapi import APIRouter
 # Canonical, display-ready category names. Edit this list to change the options.
 PREDEFINED_CATEGORIES: list[str] = [
     "Startups",
-    "Ingeniería de Software",
-    "Emprendimiento",
-    "Investigación",
-    "Comunidad UNAL",
+    "Producto Digital",
+    "Financiación",
+    "Equipos Tech",
+    "Marketing",
+    "Go to Market",
+    "Growth",
 ]
 
 # Map from case-insensitive form -> canonical spelling.
