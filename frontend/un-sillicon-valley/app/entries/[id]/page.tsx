@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { CommentSection } from "@/components/comments/CommentSection";
 import { EntryEditButton } from "@/components/entries/EntryEditButton";
+import { MarkdownView } from "@/components/entries/MarkdownView";
 import { ReactionBar } from "@/components/entries/ReactionBar";
 import { Header } from "@/components/layout/Header";
 import { getEntry } from "@/lib/api";
@@ -63,9 +64,10 @@ export default async function EntryDetailPage({ params }: EntryDetailPageProps) 
             <p className="text-sm text-muted">{affiliation}</p>
           </div>
 
-          <div className="mt-8 max-w-none whitespace-pre-wrap text-base leading-8 text-foreground/90">
-            {entry.body}
-          </div>
+          <MarkdownView
+            content={entry.body}
+            className="mt-8 max-w-none text-base text-foreground/90"
+          />
 
           {(entry.categories.length > 0 || entry.tags.length > 0) && (
             <div className="mt-8 flex flex-wrap gap-2">

@@ -585,3 +585,112 @@ h3,
   align-items: center;
   gap: 0.25rem;
 }
+
+/* ——— Rich text editor (TipTap) ——— */
+
+.tiptap {
+  color: color-mix(in srgb, var(--foreground) 90%, transparent);
+  font-size: 1rem;
+  line-height: 1.75;
+  outline: none;
+}
+
+.tiptap-editor {
+  min-height: 20rem;
+}
+
+.tiptap:focus {
+  outline: none;
+}
+
+.tiptap p {
+  margin: 0.75rem 0;
+}
+
+.tiptap h1 {
+  margin: 1.5rem 0 0.5rem;
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.tiptap h2 {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.tiptap h3 {
+  margin: 1rem 0 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.tiptap ul {
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+  list-style: disc;
+}
+
+.tiptap ol {
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+  list-style: decimal;
+}
+
+.tiptap li {
+  margin: 0.25rem 0;
+}
+
+.tiptap blockquote {
+  margin: 0.75rem 0;
+  border-left: 4px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  padding-left: 1rem;
+  font-style: italic;
+  color: color-mix(in srgb, var(--foreground) 80%, transparent);
+}
+
+.tiptap code {
+  border-radius: 0.375rem;
+  background: color-mix(in srgb, var(--foreground) 10%, transparent);
+  padding: 0.125rem 0.375rem;
+  font-family: ui-monospace, monospace;
+  font-size: 0.85em;
+}
+
+.tiptap pre {
+  margin: 0.75rem 0;
+  overflow-x: auto;
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+  padding: 1rem;
+  font-family: ui-monospace, monospace;
+  font-size: 0.875rem;
+}
+
+.tiptap pre code {
+  background: transparent;
+  padding: 0;
+}
+
+.tiptap a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.tiptap img {
+  margin: 0.5rem 0;
+  max-width: 100%;
+  border-radius: 0.5rem;
+}
+
+/* Placeholder for the empty editor */
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  color: var(--text-subtle);
+  pointer-events: none;
+}
