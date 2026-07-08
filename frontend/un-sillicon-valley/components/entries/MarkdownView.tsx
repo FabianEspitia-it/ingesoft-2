@@ -25,6 +25,10 @@ export function MarkdownView({ content, className }: MarkdownViewProps) {
     },
   });
 
+  if (!editor) {
+    return null;
+  }
+
   return (
     <div className={className}>
       <EditorContent editor={editor} />

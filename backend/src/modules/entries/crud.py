@@ -103,7 +103,7 @@ async def increment_view_count(db: AsyncSession, entry: Entry) -> None:
 
 
 async def set_success_case(db: AsyncSession, entry: Entry, value: bool) -> Entry:
-    """Flag or unflag an entry as a success case (RN-23, admin only)."""
+    """Flag or unflag an entry as a success case (admin only)."""
     entry.is_success_case = value
     db.add(entry)
     await db.flush()
@@ -281,7 +281,7 @@ async def update_entry(
     entry: Entry,
     payload: EntryUpdate,
 ) -> Entry:
-    """Edit an owned entry. Only provided fields are changed (RN-15, RN-19)."""
+    """Edit an owned entry. Only provided fields are changed."""
     if payload.title is not None:
         entry.title = payload.title.strip()
     if payload.body is not None:

@@ -89,7 +89,7 @@ async def test_filter_success_cases(
     db_session: AsyncSession,
     test_user: User,
 ):
-    """US: the success-cases page lists only admin-flagged entries (RN-23)."""
+    """The success-cases page lists only admin-flagged entries."""
     db_session.add_all(
         [
             Entry(
@@ -124,7 +124,7 @@ async def test_admin_can_flag_success_case(
     db_session: AsyncSession,
     test_user: User,
 ):
-    """RN-23: an administrator can feature an entry as a success case."""
+    """An administrator can feature an entry as a success case."""
     entry = Entry(author_id=test_user.id, title="Entrada", body="Contenido")
     db_session.add(entry)
     await db_session.commit()
@@ -154,7 +154,7 @@ async def test_non_admin_cannot_flag_success_case(
     db_session: AsyncSession,
     test_user: User,
 ):
-    """RN-23: a regular author is forbidden from featuring entries."""
+    """A regular author is forbidden from featuring entries."""
     entry = Entry(author_id=test_user.id, title="Entrada", body="Contenido")
     db_session.add(entry)
     await db_session.commit()
@@ -205,12 +205,12 @@ async def _login_second_author(client: AsyncClient, db_session: AsyncSession) ->
     return author
 
 
-# ── Editar entrada (US Release 3) ──────────────────────────────────────────
+# ── Editar entrada ──────────────────────────────────────────
 
 
 @pytest.mark.asyncio
 async def test_update_entry_by_owner(auth_client: AsyncClient):
-    """El autor puede editar su propia entrada y se marca updated_at (RN-19)."""
+    """El autor puede editar su propia entrada y se marca updated_at."""
     create = await auth_client.post(
         "/entries",
         json={"title": "Título original", "body": "Cuerpo original"},
@@ -253,7 +253,7 @@ async def test_update_entry_non_owner_forbidden(
     db_session: AsyncSession,
     test_user: User,
 ):
-    """Un autor distinto no puede editar entradas ajenas (403, RN-7)."""
+    """Un autor distinto no puede editar entradas ajenas (403)."""
     entry = Entry(author_id=test_user.id, title="Entrada", body="Contenido")
     db_session.add(entry)
     await db_session.commit()
@@ -277,7 +277,7 @@ async def test_update_entry_not_found(auth_client: AsyncClient):
     assert response.status_code == 404
 
 
-# ── Eliminar entrada (US Release 3) ────────────────────────────────────────
+# ── Eliminar entrada ────────────────────────────────────────
 
 
 @pytest.mark.asyncio
@@ -321,7 +321,7 @@ async def test_delete_entry_non_owner_forbidden(
     db_session: AsyncSession,
     test_user: User,
 ):
-    """Un autor distinto no puede eliminar entradas ajenas (403, RN-7)."""
+    """Un autor distinto no puede eliminar entradas ajenas (403)."""
     entry = Entry(author_id=test_user.id, title="Entrada", body="Contenido")
     db_session.add(entry)
     await db_session.commit()

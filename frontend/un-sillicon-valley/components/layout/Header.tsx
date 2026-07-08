@@ -48,17 +48,16 @@ function GuestAuthActions({
   variant,
 }: {
   activePath?: string;
-  variant: "default" | "marketing" | "panel" ;
+  variant: "default" | "marketing" | "panel";
 }) {
   return (
     <>
       <Link
         href="/login"
-        className={`ds-btn ds-btn-ghost ds-btn-pill shrink-0 px-4 py-2 text-sm ${
-          variant === "marketing" && activePath === "/login"
+        className={`ds-btn ds-btn-ghost ds-btn-pill shrink-0 px-4 py-2 text-sm ${variant === "marketing" && activePath === "/login"
             ? "border-foreground text-foreground"
             : ""
-        }`}
+          }`}
       >
         Iniciar sesión
       </Link>
@@ -88,7 +87,7 @@ function UserAuthActions({
   onLogout: () => void;
   onCloseMenu: () => void;
 }) {
-  const primaryAction = 
+  const primaryAction =
     variant === "panel"
       ? { href: "/admin", label: "Panel de control" }
       : { href: "/entries/new", label: "Crear entrada" };
@@ -171,12 +170,12 @@ export function Header({ variant = "default", activePath, disable = false }: Hea
   const [terms, setTerms] = useState("");
 
   const effectiveVariant: "default" | "marketing" | "panel" =
-  !user
-    ? "default"
-    : user.role === "administrator"
-      ? "panel"
-      : "marketing";
-  
+    !user
+      ? "default"
+      : user.role === "administrator"
+        ? "panel"
+        : "marketing";
+
   const showMarketingNav =
     effectiveVariant === "default" ||
     effectiveVariant === "marketing";
@@ -238,10 +237,9 @@ export function Header({ variant = "default", activePath, disable = false }: Hea
   }
 
   const navClass = (path: string) =>
-    `relative text-sm font-medium transition md:inline ${
-      activePath === path
-        ? "text-primary after:absolute after:-bottom-2 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-primary"
-        : "text-muted hover:text-primary"
+    `relative text-sm font-medium transition md:inline ${activePath === path
+      ? "text-primary after:absolute after:-bottom-2 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-primary"
+      : "text-muted hover:text-primary"
     }`;
 
   return (
@@ -268,7 +266,7 @@ export function Header({ variant = "default", activePath, disable = false }: Hea
             <Link href="/featured" className={navClass("/destacados")}>
               Destacados
             </Link>
-            <Link href="/casos-de-exito" className={navClass("/casos-de-exito")}>
+            <Link href="/success-stories" className={navClass("/success-stories")}>
               Casos de éxito
             </Link>
           </nav>
@@ -281,9 +279,8 @@ export function Header({ variant = "default", activePath, disable = false }: Hea
         )}
 
         <div
-          className={`header-end ${
-            effectiveVariant === "panel" ? "shrink-0" : ""
-          }`}
+          className={`header-end ${effectiveVariant === "panel" ? "shrink-0" : ""
+            }`}
         >
           {showSearch && (
             <form
@@ -291,9 +288,8 @@ export function Header({ variant = "default", activePath, disable = false }: Hea
               className={`header-search-slot hidden shrink-0 xl:block ${disable ? "pointer-events-none" : ""}`}
             >
               <label
-                className={`relative block w-52 xl:w-64 ${
-                  disable ? "header-search-wrapper--disabled" : ""
-                }`}
+                className={`relative block w-52 xl:w-64 ${disable ? "header-search-wrapper--disabled" : ""
+                  }`}
               >
                 <span className="sr-only">Buscar entradas</span>
                 <span className="header-search-icon pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-subtle">
@@ -323,7 +319,7 @@ export function Header({ variant = "default", activePath, disable = false }: Hea
                 menuOpen={menuOpen}
                 menuRef={menuRef}
                 isLoggingOut={isLoggingOut}
-                variant={effectiveVariant}  
+                variant={effectiveVariant}
                 onToggleMenu={() => setMenuOpen((open) => !open)}
                 onLogout={handleLogout}
                 onCloseMenu={() => setMenuOpen(false)}

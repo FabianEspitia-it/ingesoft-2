@@ -43,7 +43,7 @@ async def list_entry_comments(
     entry_id: int,
     db: AsyncSession = Depends(get_db),
 ):
-    """US: List the comments of an entry, newest first."""
+    """List the comments of an entry, newest first."""
     await _get_published_entry_or_404(db, entry_id)
     comments, total = await crud.list_comments(db, entry_id)
     return CommentListResponse(
@@ -63,7 +63,7 @@ async def create_entry_comment(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """US: Publish a comment on an entry (requires authenticated user)."""
+    """Publish a comment on an entry (requires authenticated user)."""
     await _get_published_entry_or_404(db, entry_id)
     comment = await crud.create_comment(
         db,

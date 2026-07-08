@@ -23,7 +23,7 @@ from src.modules.entries.schemas import (
 
 entries_router = APIRouter(prefix="/entries", tags=["Entries"])
 MAX_PAGE_SIZE = 20
-MAX_COVER_IMAGE_BYTES = 5 * 1024 * 1024  # 5 MB (RN: cover image <=5MB)
+MAX_COVER_IMAGE_BYTES = 5 * 1024 * 1024  # 5 MB max cover image size
 ALLOWED_COVER_IMAGE_TYPES = {"image/jpeg", "image/png"}
 
 
@@ -49,7 +49,7 @@ async def list_entries(
     page_size: int = Query(20, ge=1, le=MAX_PAGE_SIZE),
     author_id: int | None = Query(None),
     is_success_case: bool | None = Query(
-        None, description="Filter by admin-flagged success cases (RN-23)."
+        None, description="Filter by admin-flagged success cases."
     ),
     db: AsyncSession = Depends(get_db),
 ):
@@ -97,7 +97,7 @@ async def set_entry_success_case(
     db: AsyncSession = Depends(get_db),
     _admin: User = Depends(require_role(UserRole.administrator)),
 ):
-    """Admin-only: feature or unfeature an entry as a success case (RN-23)."""
+    """Admin-only: feature or unfeature an entry as a success case."""
     entry = await crud.get_entry_by_id(db, entry_id)
     if entry is None:
         raise HTTPException(
@@ -164,7 +164,7 @@ async def upload_cover_image_endpoint(
 
 
 def _ensure_can_manage(entry, current_user: User) -> None:
-    """Only the author or an administrator may edit/delete an entry (RN-7)."""
+    """Only the author or an administrator may edit/delete an entry."""
     if (
         entry.author_id != current_user.id
         and current_user.role != UserRole.administrator
@@ -182,7 +182,7 @@ async def update_entry(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Edit an owned entry: title, body, categories and tags (RN-15, RN-19)."""
+    """Edit an owned entry: title, body, categories and tags."""
     entry = await crud.get_entry_by_id(db, entry_id)
     if entry is None:
         raise HTTPException(

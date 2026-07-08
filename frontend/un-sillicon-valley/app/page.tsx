@@ -52,7 +52,7 @@ export default async function HomePage() {
                 Entradas recientes
                 {totalEntries > 0 && (
                   <span className="ml-2 text-sm font-normal text-subtle">
-                    (orden descendente por fecha &mdash; RN-36)
+                    (orden descendente por fecha)
                   </span>
                 )}
               </h1>

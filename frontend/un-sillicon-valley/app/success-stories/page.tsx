@@ -15,7 +15,7 @@ export default async function SuccessCasesPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header variant="marketing" activePath="/casos-de-exito" />
+      <Header variant="marketing" activePath="/success-stories" />
 
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <header className="mb-8">
