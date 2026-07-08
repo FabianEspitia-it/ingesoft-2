@@ -4,46 +4,36 @@ import { memo, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { Icon, RiCloseLine } from "@/components/icons";
-import { TAG_LABELS, type EntryTag } from "@/lib/types/tags";
-
-const TAGS: EntryTag[] = [
-  "Startups",
-  "ProductoDigital",
-  "Financiacion",
-  "EquiposTech",
-  "Marketing",
-  "GoToMarket",
-  "Growth",
-];
+import { getCategories } from "@/lib/api";
 
 const INPUT_CLASS = "auth-input auth-input-compact";
 const TAG_BUTTON_CLASS =
   "rounded-full border px-3.5 py-1.5 text-sm transition-[border-color,background-color,color] duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2";
 
-function isEntryTag(value: string | null): value is EntryTag {
-  return value !== null && TAGS.includes(value as EntryTag);
-}
-
-const TagPicker = memo(function TagPicker({
+const CategoryPicker = memo(function CategoryPicker({
+  categories,
   value,
   onChange,
 }: {
-  value: EntryTag | null;
-  onChange: (value: EntryTag | null) => void;
+  categories: string[];
+  value: string | null;
+  onChange: (value: string | null) => void;
 }) {
+  if (categories.length === 0) return null;
+
   return (
     <fieldset>
       <legend className="ds-label mb-2">
-        Etiqueta <span className="font-normal text-subtle">(opcional)</span>
+        Categoría <span className="font-normal text-subtle">(opcional)</span>
       </legend>
-      <div className="flex flex-wrap gap-2" role="group" aria-label="Etiquetas de búsqueda">
-        {TAGS.map((tag) => {
-          const isSelected = value === tag;
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Categorías de búsqueda">
+        {categories.map((category) => {
+          const isSelected = value === category;
           return (
             <button
-              key={tag}
+              key={category}
               type="button"
-              onClick={() => onChange(isSelected ? null : tag)}
+              onClick={() => onChange(isSelected ? null : category)}
               className={`${TAG_BUTTON_CLASS} ${
                 isSelected
                   ? "border-primary bg-primary text-[var(--on-primary)]"
@@ -51,7 +41,7 @@ const TagPicker = memo(function TagPicker({
               }`}
               aria-pressed={isSelected}
             >
-              {TAG_LABELS[tag]}
+              {category}
             </button>
           );
         })}
@@ -64,20 +54,33 @@ export default function AdvancedSearch() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [tag, setTag] = useState<EntryTag | null>(null);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [category, setCategory] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
 
   useEffect(() => {
+    let cancelled = false;
+    getCategories()
+      .then((available) => {
+        if (!cancelled) setCategories(available);
+      })
+      .catch(() => {
+        // Categories are optional; ignore load errors silently.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
     setTitle(searchParams.get("title") ?? "");
     setAuthor(searchParams.get("author") ?? "");
-
-    const tagParam = searchParams.get("tag");
-    setTag(isEntryTag(tagParam) ? tagParam : null);
+    setCategory(searchParams.get("tag"));
   }, [searchParams]);
 
   const hasActiveFilters =
-    title.trim().length > 0 || author.trim().length > 0 || tag !== null;
+    title.trim().length > 0 || author.trim().length > 0 || category !== null;
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -88,7 +91,7 @@ export default function AdvancedSearch() {
 
     if (trimmedTitle) params.set("title", trimmedTitle);
     if (trimmedAuthor) params.set("author", trimmedAuthor);
-    if (tag) params.set("tag", tag);
+    if (category) params.set("tag", category);
 
     const query = params.toString();
     router.push(query ? `/search?${query}` : "/search");
@@ -97,7 +100,7 @@ export default function AdvancedSearch() {
   function handleClear() {
     setTitle("");
     setAuthor("");
-    setTag(null);
+    setCategory(null);
     router.push("/search");
   }
 
@@ -142,7 +145,7 @@ export default function AdvancedSearch() {
             />
           </div>
 
-          <TagPicker value={tag} onChange={setTag} />
+          <CategoryPicker categories={categories} value={category} onChange={setCategory} />
         </div>
 
         <div className="flex items-center gap-2">
