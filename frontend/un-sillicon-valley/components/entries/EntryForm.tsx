@@ -349,9 +349,9 @@ export function EntryForm({ entry }: EntryFormProps) {
           <div className="rounded-2xl border border-dashed border-border p-5">
             <p className="text-sm font-semibold text-foreground">💡 Tips de buena entrada</p>
             <ul className="mt-2 space-y-1 text-xs text-muted">
-              <li>· Mínimo título + cuerpo (RN-15)</li>
-              <li>· Al menos 1 categoría (RN-16)</li>
-              <li>· Imagen ≤ 5MB (RN-18)</li>
+              <li>· Mínimo título + cuerpo</li>
+              <li>· Al menos 1 categoría</li>
+              <li>· Imagen ≤ 5MB</li>
             </ul>
           </div>
         </aside>

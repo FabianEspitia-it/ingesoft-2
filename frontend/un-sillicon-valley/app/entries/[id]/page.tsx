@@ -94,7 +94,6 @@ export default async function EntryDetailPage({ params }: EntryDetailPageProps) 
                       <time dateTime={entry.updated_at}>
                         {formatFullDate(entry.updated_at)}
                       </time>
-                      {" (RN-19)"}
                     </>
                   )}
                 </p>

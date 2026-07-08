@@ -27,7 +27,7 @@ export function HomeSidebar({ successCases }: HomeSidebarProps) {
   }, []);
 
   return (
-    <aside aria-label="Contenido complementario" className="flex flex-col gap-6">
+    <aside aria-label="Contenido complementario" className="sticky top-22 flex flex-col gap-6 self-start">
       <section className="ds-card p-5" aria-labelledby="sidebar-success-heading">
         <h2 id="sidebar-success-heading" className="mb-4 flex items-center gap-2 text-sm font-bold text-foreground">
           <span aria-hidden="true">🏆</span>
@@ -50,7 +50,7 @@ export function HomeSidebar({ successCases }: HomeSidebarProps) {
           <p className="text-sm text-subtle">Aún no hay casos de éxito.</p>
         )}
         <Link
-          href="/casos-de-exito"
+          href="/success-stories"
           className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-foreground transition-colors hover:text-primary focus-visible:text-primary"
         >
           Ver todos &rarr;

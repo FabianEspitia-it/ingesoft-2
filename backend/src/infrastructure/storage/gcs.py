@@ -22,7 +22,7 @@ from src.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-# Extensions allowed for cover images (RN: JPG/PNG only).
+# Extensions allowed for cover images (JPG/PNG only).
 _EXTENSION_BY_CONTENT_TYPE = {
     "image/jpeg": "jpg",
     "image/png": "png",

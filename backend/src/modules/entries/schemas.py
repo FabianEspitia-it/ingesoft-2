@@ -219,7 +219,7 @@ class FeaturedEntryResponse(BaseModel):
 
 
 class SuccessCaseUpdate(BaseModel):
-    """Admin toggle to (un)feature an entry as a success case (RN-23)."""
+    """Admin toggle to (un)feature an entry as a success case."""
 
     is_success_case: bool
 
