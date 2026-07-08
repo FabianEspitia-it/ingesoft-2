@@ -116,18 +116,24 @@ class EntrySummary(BaseModel):
     published_at: datetime
     view_count: int
     is_success_case: bool = False
+    likes: int = 0
+    comments_count: int = 0
+    cover_image_url: str | None = None
     author: AuthorSummary
     categories: list[str] = Field(default_factory=list)
     tags: list[str] = Field(default_factory=list)
 
     @classmethod
-    def from_entry(cls, entry) -> EntrySummary:
+    def from_entry(cls, entry, *, likes: int = 0, comments_count: int = 0) -> EntrySummary:
         return cls(
             id=entry.id,
             title=entry.title,
             published_at=entry.published_at,
             view_count=entry.view_count,
             is_success_case=entry.is_success_case,
+            likes=likes,
+            comments_count=comments_count,
+            cover_image_url=signed_cover_url(entry.cover_image),
             author=AuthorSummary.model_validate(entry.author),
             categories=_categories_of(entry),
             tags=_free_tags_of(entry),
@@ -184,6 +190,7 @@ class FeaturedEntrySummary(BaseModel):
     view_count: int
     likes: int
     comments_count: int
+    cover_image_url: str | None = None
     author: AuthorSummary
     categories: list[str] = Field(default_factory=list)
     tags: list[str] = Field(default_factory=list)
@@ -197,6 +204,7 @@ class FeaturedEntrySummary(BaseModel):
             view_count=entry.view_count,
             likes=likes,
             comments_count=comments_count,
+            cover_image_url=signed_cover_url(entry.cover_image),
             author=AuthorSummary.model_validate(entry.author),
             categories=_categories_of(entry),
             tags=_free_tags_of(entry),

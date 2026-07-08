@@ -2,7 +2,7 @@ from sqlalchemy import and_, bindparam, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from src.infrastructure.db.models import Entry, EntryStatus, Tag, User
+from src.infrastructure.db.models import Comment, Entry, EntryStatus, Reaction, ReactionType, Tag, User
 
 
 def _normalize(value: str | None) -> str | None:
@@ -36,7 +36,7 @@ async def search_terms(
     tag: str | None,
     page: int = 1,
     page_size: int = 20,
-) -> list[Entry]:
+) -> list[dict]:
     offset = (page - 1) * page_size
     params: dict[str, str] = {}
     use_postgres_fts = _uses_postgres_fts(db)
@@ -46,9 +46,34 @@ async def search_terms(
     author = _normalize(author)
     tag = _normalize(tag)
 
+    likes_subq = (
+        select(
+            Reaction.entry_id,
+            func.count().label("like_count"),
+        )
+        .where(Reaction.type == ReactionType.like)
+        .group_by(Reaction.entry_id)
+        .subquery()
+    )
+
+    comments_subq = (
+        select(
+            Comment.entry_id,
+            func.count().label("comment_count"),
+        )
+        .group_by(Comment.entry_id)
+        .subquery()
+    )
+
     query = (
-        select(Entry)
+        select(
+            Entry,
+            func.coalesce(likes_subq.c.like_count, 0).label("likes"),
+            func.coalesce(comments_subq.c.comment_count, 0).label("comments_count"),
+        )
         .join(User, User.id == Entry.author_id)
+        .outerjoin(likes_subq, Entry.id == likes_subq.c.entry_id)
+        .outerjoin(comments_subq, Entry.id == comments_subq.c.entry_id)
         .options(selectinload(Entry.author), selectinload(Entry.tags))
         .where(
             Entry.deleted_at.is_(None),
@@ -102,4 +127,11 @@ async def search_terms(
     query = query.order_by(Entry.published_at.desc()).offset(offset).limit(page_size)
 
     result = await db.execute(query, params)
-    return list(result.scalars().unique().all())
+    entries = []
+    for row in result.unique().all():
+        entries.append({
+            "entry": row[0],
+            "likes": row[1],
+            "comments_count": row[2],
+        })
+    return entries
