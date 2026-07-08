@@ -29,8 +29,22 @@ export function MarkdownView({ content, className }: MarkdownViewProps) {
     return null;
   }
 
+  // TipTap's Link extension refuses to open links when the editor is not
+  // editable (its click handler bails on `!view.editable`), and ProseMirror
+  // swallows the anchor's native navigation. Delegate the click ourselves so
+  // links in published entries actually open. Anchors stay keyboard-accessible
+  // natively (focusable + Enter), so this only augments mouse clicks.
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const anchor = (e.target as HTMLElement).closest("a");
+    if (anchor?.href) {
+      e.preventDefault();
+      window.open(anchor.href, "_blank", "noopener,noreferrer");
+    }
+  };
+
   return (
-    <div className={className}>
+    // biome-ignore lint/a11y/useKeyWithClickEvents: delegated link opener; anchors remain keyboard-accessible on their own.
+    <div className={className} onClick={handleClick}>
       <EditorContent editor={editor} />
     </div>
   );

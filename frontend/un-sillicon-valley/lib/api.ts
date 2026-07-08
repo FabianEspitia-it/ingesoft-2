@@ -100,6 +100,16 @@ export function uploadCoverImage(file: File): Promise<CoverImageResponse> {
   });
 }
 
+/**
+ * Stable URL for an uploaded image object path (e.g. `covers/<uuid>.jpg`).
+ *
+ * Safe to embed in entry-body Markdown: the backend redirects to a fresh signed
+ * URL on every request, so it never expires the way a raw signed URL would.
+ */
+export function entryImageUrl(path: string): string {
+  return `${API_URL}/entries/image/${path}`;
+}
+
 export function setSuccessCase(id: number, isSuccessCase: boolean): Promise<EntryDetail> {
   return apiFetch<EntryDetail>(`/entries/${id}/success-case`, {
     method: "PATCH",

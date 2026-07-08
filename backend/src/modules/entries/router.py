@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.api.dependencies import get_current_user, require_role
 from src.infrastructure.db.database import get_db
@@ -161,6 +162,25 @@ async def upload_cover_image_endpoint(
         ) from None
 
     return CoverImageResponse(path=object_path, url=signed_cover_url(object_path))
+
+
+@entries_router.get("/image/{object_path:path}")
+async def get_entry_image(object_path: str):
+    """Redirect a stable image path to a fresh signed URL.
+
+    Images embedded in an entry body are stored as object paths (e.g.
+    ``covers/<uuid>.jpg``). The bucket is private and signed URLs expire, so the
+    body cannot embed the signed URL directly. Instead it embeds this stable
+    endpoint, which resolves a short-lived signed URL on every request and
+    redirects to it. Public: images render on public entry pages.
+    """
+    url = signed_cover_url(object_path)
+    if not url:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Imagen no encontrada.",
+        )
+    return RedirectResponse(url)
 
 
 def _ensure_can_manage(entry, current_user: User) -> None:

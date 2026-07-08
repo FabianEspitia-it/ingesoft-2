@@ -12,7 +12,11 @@ import { Markdown } from "tiptap-markdown";
 export function markdownExtensions(options?: { linkOpenOnClick?: boolean }): Extensions {
   return [
     StarterKit.configure({ link: false }),
-    Link.configure({ openOnClick: options?.linkOpenOnClick ?? false, autolink: true }),
+    Link.configure({
+      openOnClick: options?.linkOpenOnClick ?? false,
+      autolink: true,
+      HTMLAttributes: { target: "_blank", rel: "noopener noreferrer nofollow" },
+    }),
     Image,
     Markdown.configure({ html: false }),
   ];
