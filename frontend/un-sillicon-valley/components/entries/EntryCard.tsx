@@ -86,9 +86,16 @@ export function EntryCard({ entry, variant = "default" }: EntryCardProps) {
   }
 
   if (variant === "compact") {
+    const isSuccessCase = "is_success_case" in entry && entry.is_success_case;
+
     return (
       <article className="ds-card group flex flex-col overflow-hidden transition-colors hover:border-primary/30">
         <div className="relative aspect-video w-full bg-border/20">
+          {isSuccessCase && (
+            <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-accent/90 px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
+              ⭐ Caso de éxito
+            </span>
+          )}
           {coverUrl ? (
             <Image
               src={coverUrl}
