@@ -25,7 +25,12 @@ async def get_search(
         entries = await crud.search_terms(db, None, title, author, tag)
 
     return EntryListResponse(
-        items=[EntrySummary.from_entry(entry) for entry in entries],
+        items=[
+            EntrySummary.from_entry(
+                e["entry"], likes=e["likes"], comments_count=e["comments_count"]
+            )
+            for e in entries
+        ],
         total=len(entries),
         page=page,
         page_size=page_size,

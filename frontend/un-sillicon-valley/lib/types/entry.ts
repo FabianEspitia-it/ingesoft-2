@@ -10,6 +10,9 @@ export type EntrySummary = {
   published_at: string;
   view_count: number;
   is_success_case: boolean;
+  likes: number;
+  comments_count: number;
+  cover_image_url: string | null;
   author: AuthorSummary;
   categories: string[];
   tags: string[];
@@ -67,6 +70,7 @@ export type FeaturedEntrySummary = {
   view_count: number;
   likes: number;
   comments_count: number;
+  cover_image_url: string | null;
   author: AuthorSummary;
   categories: string[];
   tags: string[];

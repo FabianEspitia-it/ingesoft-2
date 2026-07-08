@@ -62,7 +62,12 @@ async def list_entries(
         is_success_case=is_success_case,
     )
     return EntryListResponse(
-        items=[EntrySummary.from_entry(entry) for entry in entries],
+        items=[
+            EntrySummary.from_entry(
+                e["entry"], likes=e["likes"], comments_count=e["comments_count"]
+            )
+            for e in entries
+        ],
         total=total,
         page=page,
         page_size=page_size,
@@ -218,7 +223,12 @@ async def list_all_entries(
         page_size=page_size,
     )
     return EntryListResponse(
-        items=[EntrySummary.from_entry(entry) for entry in entries],
+        items=[
+            EntrySummary.from_entry(
+                e["entry"], likes=e["likes"], comments_count=e["comments_count"]
+            )
+            for e in entries
+        ],
         total=total,
         page=page,
         page_size=page_size,

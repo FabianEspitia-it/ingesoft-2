@@ -17,7 +17,7 @@ function formatShortDate(isoDate: string): string {
 
 export function FeaturedHero({ entry }: FeaturedHeroProps) {
   const affiliation = AFFILIATION_LABELS[entry.author.affiliation] ?? entry.author.affiliation;
-  const coverUrl = "cover_image_url" in entry ? (entry as { cover_image_url?: string | null }).cover_image_url : null;
+  const coverUrl = entry.cover_image_url;
 
   return (
     <article className="ds-card group grid gap-0 overflow-hidden transition-colors hover:border-primary/30 md:grid-cols-[2fr_3fr]">

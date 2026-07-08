@@ -23,7 +23,7 @@ async def list_entries(
     page_size: int = 20,
     author_id: int | None = None,
     is_success_case: bool | None = None,
-) -> tuple[list[Entry], int]:
+) -> tuple[list[dict], int]:
     offset = (page - 1) * page_size
     filters = [
         Entry.deleted_at.is_(None),
@@ -38,15 +38,49 @@ async def list_entries(
         select(func.count()).select_from(Entry).where(*filters)
     )
     total = count_result.scalar_one()
+
+    likes_subq = (
+        select(
+            Reaction.entry_id,
+            func.count().label("like_count"),
+        )
+        .where(Reaction.type == ReactionType.like)
+        .group_by(Reaction.entry_id)
+        .subquery()
+    )
+
+    comments_subq = (
+        select(
+            Comment.entry_id,
+            func.count().label("comment_count"),
+        )
+        .group_by(Comment.entry_id)
+        .subquery()
+    )
+
     result = await db.execute(
-        select(Entry)
+        select(
+            Entry,
+            func.coalesce(likes_subq.c.like_count, 0).label("likes"),
+            func.coalesce(comments_subq.c.comment_count, 0).label("comments_count"),
+        )
+        .outerjoin(likes_subq, Entry.id == likes_subq.c.entry_id)
+        .outerjoin(comments_subq, Entry.id == comments_subq.c.entry_id)
         .options(selectinload(Entry.author), selectinload(Entry.tags))
         .where(*filters)
         .order_by(Entry.published_at.desc())
         .offset(offset)
         .limit(page_size)
     )
-    return list(result.scalars().all()), total
+
+    entries = []
+    for row in result.all():
+        entries.append({
+            "entry": row[0],
+            "likes": row[1],
+            "comments_count": row[2],
+        })
+    return entries, total
 
 
 async def get_entry_by_id(db: AsyncSession, entry_id: int) -> Entry | None:
@@ -292,23 +326,57 @@ async def list_all_entries(
     *,
     page: int = 1,
     page_size: int = 20,
-) -> tuple[list[Entry], int]:
+) -> tuple[list[dict], int]:
     offset = (page - 1) * page_size
     filters = [
         Entry.deleted_at.is_(None),
         Entry.status == EntryStatus.published,
     ]
-    
+
     count_result = await db.execute(
         select(func.count()).select_from(Entry).where(*filters)
     )
     total = count_result.scalar_one()
+
+    likes_subq = (
+        select(
+            Reaction.entry_id,
+            func.count().label("like_count"),
+        )
+        .where(Reaction.type == ReactionType.like)
+        .group_by(Reaction.entry_id)
+        .subquery()
+    )
+
+    comments_subq = (
+        select(
+            Comment.entry_id,
+            func.count().label("comment_count"),
+        )
+        .group_by(Comment.entry_id)
+        .subquery()
+    )
+
     result = await db.execute(
-        select(Entry)
+        select(
+            Entry,
+            func.coalesce(likes_subq.c.like_count, 0).label("likes"),
+            func.coalesce(comments_subq.c.comment_count, 0).label("comments_count"),
+        )
+        .outerjoin(likes_subq, Entry.id == likes_subq.c.entry_id)
+        .outerjoin(comments_subq, Entry.id == comments_subq.c.entry_id)
         .options(selectinload(Entry.author), selectinload(Entry.tags))
         .where(*filters)
         .order_by(Entry.published_at.desc())
         .offset(offset)
         .limit(page_size)
     )
-    return list(result.scalars().all()), total
+
+    entries = []
+    for row in result.all():
+        entries.append({
+            "entry": row[0],
+            "likes": row[1],
+            "comments_count": row[2],
+        })
+    return entries, total
