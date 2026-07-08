@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 
 import { CommentSection } from "@/components/comments/CommentSection";
 import { ReactionBar } from "@/components/entries/ReactionBar";
-import { SuccessCaseToggle } from "@/components/entries/SuccessCaseToggle";
 import { Header } from "@/components/layout/Header";
 import { getEntry } from "@/lib/api";
 import { AFFILIATION_LABELS, formatPublishedDate } from "@/lib/types/entry";
@@ -77,8 +76,6 @@ export default async function EntryDetailPage({ params }: EntryDetailPageProps) 
           <p className="mt-8 text-sm text-subtle">{entry.view_count} vistas</p>
 
           <ReactionBar entryId={entry.id} />
-
-          <SuccessCaseToggle entryId={entry.id} initialValue={entry.is_success_case} />
         </article>
 
         <CommentSection entryId={entry.id} />

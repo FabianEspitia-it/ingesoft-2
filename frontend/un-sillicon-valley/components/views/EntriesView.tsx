@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { Icon, RiDeleteBinLine } from "@/components/icons";
-import { deleteEntry, getAllEntries } from "@/lib/api";
+import { deleteEntry, getAllEntries, setSuccessCase } from "@/lib/api";
 import type { EntrySummary } from "@/lib/types/entry";
 import { EntryCard } from "../entries/EntryCard";
 
@@ -62,6 +62,7 @@ export default function EntriesView() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<EntrySummary | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [togglingId, setTogglingId] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -95,6 +96,23 @@ export default function EntriesView() {
     }
   }
 
+  async function handleToggleSuccessCase(entry: EntrySummary) {
+    setTogglingId(entry.id);
+    setLoadError(null);
+    try {
+      const updated = await setSuccessCase(entry.id, !entry.is_success_case);
+      setEntries((current) =>
+        current.map((item) =>
+          item.id === entry.id ? { ...item, is_success_case: updated.is_success_case } : item,
+        ),
+      );
+    } catch {
+      setLoadError("No se pudo actualizar el caso de éxito.");
+    } finally {
+      setTogglingId(null);
+    }
+  }
+
   return (
     <div>
       <h1 className="text-2xl font-bold mb-4">Entradas Admin</h1>
@@ -107,7 +125,19 @@ export default function EntriesView() {
           ? entries.map((entry) => (
               <div key={entry.id} className="space-y-2">
                 <EntryCard entry={entry} />
-                <div className="flex justify-end">
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleToggleSuccessCase(entry)}
+                    disabled={togglingId === entry.id}
+                    className="ds-btn ds-btn-ghost ds-btn-pill inline-flex items-center gap-1.5 px-3 py-1.5 text-sm disabled:opacity-50"
+                  >
+                    {togglingId === entry.id
+                      ? "Guardando…"
+                      : entry.is_success_case
+                        ? "Quitar de casos de éxito"
+                        : "⭐ Destacar como caso de éxito"}
+                  </button>
                   <button
                     type="button"
                     onClick={() => setPendingDelete(entry)}
