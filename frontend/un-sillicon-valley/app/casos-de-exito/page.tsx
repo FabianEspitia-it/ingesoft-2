@@ -16,24 +16,29 @@ export default async function SuccessCasesPage() {
   return (
     <div className="min-h-screen bg-background">
       <Header variant="marketing" activePath="/casos-de-exito" />
-      <main className="mx-auto max-w-5xl px-6 py-10">
-        <section className="mb-10">
-          <p className="ds-eyebrow">Destacados por administradores</p>
-          <h1 className="ds-headline mt-2 text-4xl sm:text-5xl">Casos de éxito</h1>
-          <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted">
-            Entradas marcadas por administradores con la etiqueta especial &ldquo;Caso de
-            éxito&rdquo;.
-          </p>
-        </section>
 
-        {loadError && <div className="ds-alert ds-alert-warning mb-6">{loadError}</div>}
+      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <header className="mb-8">
+          <h1 className="ds-headline text-3xl sm:text-4xl" style={{ textWrap: "balance" }}>
+            Casos de éxito
+          </h1>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">
+            Entradas marcadas por administradores con la etiqueta especial &ldquo;Caso de éxito&rdquo;.
+          </p>
+        </header>
+
+        {loadError && (
+          <div className="ds-alert ds-alert-warning mb-6" role="alert">{loadError}</div>
+        )}
 
         {entries && entries.items.length > 0 ? (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {entries.items.map((entry) => (
-              <EntryCard key={entry.id} entry={entry} />
-            ))}
-          </div>
+          <section aria-label="Lista de casos de éxito">
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {entries.items.map((entry) => (
+                <EntryCard key={entry.id} entry={entry} variant="compact" />
+              ))}
+            </div>
+          </section>
         ) : (
           !loadError && (
             <div className="ds-card border-dashed px-6 py-12 text-center">
