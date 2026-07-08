@@ -585,3 +585,28 @@ h3,
   align-items: center;
   gap: 0.25rem;
 }
+
+/* ——— Accessibility & Motion ——— */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ——— Home Layout Utilities ——— */
+
+.font-variant-numeric {
+  font-variant-numeric: tabular-nums;
+}
+
