@@ -49,7 +49,7 @@ async def search_terms(
     query = (
         select(Entry)
         .join(User, User.id == Entry.author_id)
-        .options(selectinload(Entry.author))
+        .options(selectinload(Entry.author), selectinload(Entry.tags))
         .where(
             Entry.deleted_at.is_(None),
             Entry.status == EntryStatus.published,
