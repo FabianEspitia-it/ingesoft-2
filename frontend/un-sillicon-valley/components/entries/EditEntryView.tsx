@@ -73,9 +73,5 @@ export function EditEntryView({ entryId }: EditEntryViewProps) {
     );
   }
 
-  return (
-    <div className="ds-card p-8">
-      <EntryForm entry={entry} />
-    </div>
-  );
+  return <EntryForm entry={entry} />;
 }
