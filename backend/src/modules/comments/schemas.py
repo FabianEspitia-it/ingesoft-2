@@ -50,3 +50,31 @@ class CommentResponse(BaseModel):
 class CommentListResponse(BaseModel):
     items: list[CommentResponse]
     total: int
+
+
+class CommentEntry(BaseModel):
+    """Minimal entry context shown alongside a comment in moderation."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    title: str
+    category: str | None = None
+
+
+class AdminCommentResponse(BaseModel):
+    """A comment enriched with the entry it belongs to, for moderation."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    content: str
+    published_at: datetime
+    edited_at: datetime | None
+    author: CommentAuthor
+    entry: CommentEntry
+
+
+class AdminCommentListResponse(BaseModel):
+    items: list[AdminCommentResponse]
+    total: int

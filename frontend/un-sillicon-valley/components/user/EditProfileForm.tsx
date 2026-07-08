@@ -1,17 +1,17 @@
 "use client";
 
-import { memo, useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { memo, useEffect, useRef, useState, useTransition } from "react";
 
 import { Icon, RiArrowRightLine } from "@/components/icons";
+import { ProjectList } from "@/components/projects/ProjectList";
+import { getCurrentUser, updateUser } from "@/lib/api";
 import {
-  User,
-  UpdateUserPayload,
   AFFILIATION_LABELS,
+  type UpdateUserPayload,
+  type User,
   type UserAffiliation,
 } from "@/lib/types/user";
-import { getCurrentUser, updateUser } from "@/lib/api";
-import { ProjectList } from "@/components/projects/ProjectList";
 
 const AFFILIATIONS: UserAffiliation[] = ["student", "graduate", "professor"];
 
@@ -178,12 +178,10 @@ export function EditProfileForm() {
   }
 
   return (
-    <div className="auth-reveal mx-auto w-full max-w-2xl">
+    <div className="auth-reveal w-full">
       <header className="mb-7">
-        <h1 className="ds-headline text-3xl text-foreground xl:text-[2rem]">Editar perfil</h1>
-        <p className="mt-1.5 text-sm text-muted">
-          Los cambios se reflejarán en tu perfil público.
-        </p>
+        <h1 className="ds-headline text-3xl text-foreground xl:text-[2.25rem]">Editar perfil</h1>
+        <p className="mt-1.5 text-sm text-muted">Los cambios se reflejarán en tu perfil público.</p>
       </header>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -202,9 +200,8 @@ export function EditProfileForm() {
         )}
 
         {/* ── Foto de perfil ── */}
-        <section className="rounded-2xl border border-border bg-background/30 p-5">
-          <h2 className="mb-4 text-sm font-semibold text-foreground">Foto de perfil</h2>
-          <div className="flex items-center gap-5">
+        <section className="ds-card p-6">
+          <div className="flex flex-wrap items-center gap-5">
             <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full border-2 border-border bg-background/50">
               {avatarPreview ? (
                 <img
@@ -217,6 +214,11 @@ export function EditProfileForm() {
                   {getInitial(fullName || user.full_name)}
                 </div>
               )}
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <h2 className="text-sm font-semibold text-foreground">Foto de perfil</h2>
+              <p className="mt-0.5 text-xs text-subtle">PNG o JPG · cuadrada · mín. 200×200</p>
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -244,28 +246,32 @@ export function EditProfileForm() {
         </section>
 
         {/* ── Información básica ── */}
-        <section className="rounded-2xl border border-border bg-background/30 p-5">
-          <h2 className="mb-4 text-sm font-semibold text-foreground">Información básica</h2>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="full_name" className="ds-label">
-                Nombre completo
-              </label>
-              <input
-                id="full_name"
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className={INPUT_CLASS}
-                placeholder="Tu nombre completo"
-              />
-            </div>
+        <section className="ds-card p-6">
+          <h2 className="mb-5 border-b border-dashed border-border pb-3 text-sm font-semibold text-foreground">
+            Información básica
+          </h2>
+          <div className="space-y-5">
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label htmlFor="full_name" className="ds-label">
+                  Nombre completo
+                </label>
+                <input
+                  id="full_name"
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className={INPUT_CLASS}
+                  placeholder="Tu nombre completo"
+                />
+              </div>
 
-            <AffiliationPicker value={affiliation} onChange={setAffiliation} />
+              <AffiliationPicker value={affiliation} onChange={setAffiliation} />
+            </div>
 
             <div>
               <label htmlFor="email" className="ds-label">
-                Correo institucional
+                Correo institucional <span className="font-normal text-subtle">(no editable)</span>
               </label>
               <input
                 id="email"
@@ -275,7 +281,6 @@ export function EditProfileForm() {
                 disabled
                 className={`${INPUT_CLASS} cursor-not-allowed opacity-50`}
               />
-              <p className="mt-1 text-xs text-subtle">El correo no se puede cambiar.</p>
             </div>
 
             <div>
@@ -305,7 +310,9 @@ export function EditProfileForm() {
             disabled={isPending}
             className="group relative ds-btn ds-btn-primary overflow-hidden sm:min-w-[200px]"
           >
-            <span className={`relative z-10 inline-flex items-center gap-2 ${isPending ? "opacity-80" : ""}`}>
+            <span
+              className={`relative z-10 inline-flex items-center gap-2 ${isPending ? "opacity-80" : ""}`}
+            >
               {isPending ? "Guardando..." : "Guardar cambios"}
               {!isPending && <Icon icon={RiArrowRightLine} size={18} />}
             </span>

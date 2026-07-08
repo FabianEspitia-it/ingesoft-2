@@ -1,4 +1,5 @@
 import type {
+  AdminCommentListResponse,
   Comment,
   CommentCreatePayload,
   CommentListResponse,
@@ -244,8 +245,8 @@ export function getAllEntries(): Promise<EntryListResponse> {
   return apiFetch<EntryListResponse>(`/entries/all/`, {});
 }
 
-export function getAllComments(): Promise<CommentListResponse> {
-  return apiFetch<CommentListResponse>(`/entries/{entry_id}/comments/all/`, {});
+export function getAllComments(): Promise<AdminCommentListResponse> {
+  return apiFetch<AdminCommentListResponse>("/entries/{entry_id}/comments/all/", {});
 }
 
 export function deleteCommentById(commentId: number): Promise<void> {

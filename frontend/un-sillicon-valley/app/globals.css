@@ -274,6 +274,13 @@ h3,
   padding: 0.625rem 0.875rem;
 }
 
+/* Deja espacio a la izquierda para un icono superpuesto (p. ej. la lupa).
+   Debe ir después de .auth-input/.auth-input-compact para ganarle al
+   `padding` abreviado que estas declaran. */
+.auth-input-search {
+  padding-left: 2.75rem;
+}
+
 /* ——— Header ——— */
 
 .site-header {

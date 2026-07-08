@@ -5,12 +5,25 @@ from src.infrastructure.db.database import get_db
 from src.infrastructure.db.models import User
 from src.modules.comments import crud
 from src.modules.comments.schemas import (
+    AdminCommentListResponse,
+    AdminCommentResponse,
+    CommentAuthor,
     CommentCreate,
+    CommentEntry,
     CommentListResponse,
     CommentResponse,
     CommentUpdate,
 )
 from src.modules.entries import crud as entries_crud
+from src.modules.entries.categories import is_category
+
+
+def _first_category(entry) -> str | None:
+    """Return the entry's first predefined category tag, if any."""
+    for tag in entry.tags:
+        if is_category(tag.name):
+            return tag.name
+    return None
 
 comments_router = APIRouter(prefix="/entries/{entry_id}/comments", tags=["Comments"])
 
@@ -115,20 +128,34 @@ async def delete_comment(
     await crud.delete_comment(db, comment_id)
 
 @comments_router.get(
-    "/all/", 
-    response_model=CommentListResponse)
+    "/all/",
+    response_model=AdminCommentListResponse)
 async def list_all_comments(
     db: AsyncSession = Depends(get_db),
 ):
-    """US: List the comments of an entry, newest first."""
+    """US (admin): List every comment with its entry context, newest first."""
     comments, total = await crud.list_all_comments(db)
     if comments is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Comentarios no encontrados.",
         )
-    return CommentListResponse(
-        items=[CommentResponse.model_validate(c) for c in comments],
+    return AdminCommentListResponse(
+        items=[
+            AdminCommentResponse(
+                id=c.id,
+                content=c.content,
+                published_at=c.published_at,
+                edited_at=c.edited_at,
+                author=CommentAuthor.model_validate(c.author),
+                entry=CommentEntry(
+                    id=c.entry.id,
+                    title=c.entry.title,
+                    category=_first_category(c.entry),
+                ),
+            )
+            for c in comments
+        ],
         total=total,
     )
 

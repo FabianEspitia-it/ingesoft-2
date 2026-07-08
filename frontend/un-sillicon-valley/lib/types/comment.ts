@@ -17,6 +17,22 @@ export type CommentListResponse = {
   total: number;
 };
 
+/** Minimal entry context attached to a comment in the moderation view. */
+export type CommentEntry = {
+  id: number;
+  title: string;
+  category: string | null;
+};
+
+export type AdminComment = Comment & {
+  entry: CommentEntry;
+};
+
+export type AdminCommentListResponse = {
+  items: AdminComment[];
+  total: number;
+};
+
 export type CommentCreatePayload = {
   content: string;
 };

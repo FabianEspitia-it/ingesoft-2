@@ -1,10 +1,17 @@
 "use client";
 
+import {
+  Icon,
+  RiAddLine,
+  RiArrowRightLine,
+  RiDeleteBinLine,
+  RiEditLine,
+  RiImage2Line,
+} from "@/components/icons";
+import { createProject, deleteProject, getMyProjects, updateProject } from "@/lib/api";
+import type { Project } from "@/lib/types/project";
 import { memo, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Icon, RiAddLine, RiDeleteBinLine, RiEditLine } from "@/components/icons";
-import type { Project } from "@/lib/types/project";
-import { createProject, deleteProject, getMyProjects, updateProject } from "@/lib/api";
 import { ProjectForm, type ProjectFormData } from "./ProjectForm";
 
 type Props = {
@@ -24,6 +31,13 @@ const ProjectCard = memo(function ProjectCard({
 }) {
   return (
     <div className="flex items-start gap-4 rounded-xl border border-border bg-background/30 p-4 transition hover:border-border/80">
+      <div
+        aria-hidden
+        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border border-border bg-background/50 text-subtle"
+      >
+        <Icon icon={RiImage2Line} size={20} />
+      </div>
+
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold text-foreground">{project.title}</p>
         {project.description && (
@@ -34,8 +48,9 @@ const ProjectCard = memo(function ProjectCard({
             href={project.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-1 inline-block truncate text-xs text-primary hover:underline"
+            className="mt-1 inline-flex items-center gap-1 truncate text-xs text-primary hover:underline"
           >
+            <Icon icon={RiArrowRightLine} size={13} className="-rotate-45" />
             {project.url}
           </a>
         )}
@@ -84,8 +99,8 @@ function DeleteConfirmDialog({
       <div className="w-full max-w-sm rounded-2xl border border-border bg-background p-6 shadow-xl">
         <h2 className="ds-headline mb-2 text-lg text-foreground">¿Eliminar proyecto?</h2>
         <p className="text-sm text-muted">
-          Vas a eliminar <span className="font-medium text-foreground">"{project.title}"</span>. Esta acción no se
-          puede deshacer.
+          Vas a eliminar <span className="font-medium text-foreground">"{project.title}"</span>.
+          Esta acción no se puede deshacer.
         </p>
         <div className="mt-6 flex justify-end gap-3">
           <button
@@ -205,8 +220,8 @@ export function ProjectList({ userId }: Props) {
         />
       )}
 
-      <section className="rounded-2xl border border-border bg-background/30 p-5">
-        <div className="mb-4 flex items-center justify-between">
+      <section className="ds-card p-6">
+        <div className="mb-5 flex items-center justify-between border-b border-dashed border-border pb-3">
           <h2 className="text-sm font-semibold text-foreground">Portafolio de ideas / proyectos</h2>
           <button
             type="button"
@@ -238,7 +253,9 @@ export function ProjectList({ userId }: Props) {
         ) : projects.length === 0 ? (
           <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-border py-10 text-center">
             <p className="text-sm font-medium text-muted">Aún no tienes proyectos.</p>
-            <p className="text-xs text-subtle">Añade tus ideas y proyectos para que otros los conozcan.</p>
+            <p className="text-xs text-subtle">
+              Añade tus ideas y proyectos para que otros los conozcan.
+            </p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -259,4 +276,4 @@ export function ProjectList({ userId }: Props) {
       </section>
     </>
   );
-}   
+}

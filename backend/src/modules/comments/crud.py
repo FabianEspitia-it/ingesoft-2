@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from src.infrastructure.db.models import Comment, User
+from src.infrastructure.db.models import Comment, Entry, User
 
 
 async def list_comments(
@@ -90,7 +90,10 @@ async def list_all_comments(
 
     result = await db.execute(
         select(Comment)
-        .options(selectinload(Comment.author))
+        .options(
+            selectinload(Comment.author),
+            selectinload(Comment.entry).selectinload(Entry.tags),
+        )
         .order_by(Comment.published_at.desc(), Comment.id.desc())
     )
-    return list(result.scalars().all()), total       
+    return list(result.scalars().all()), total

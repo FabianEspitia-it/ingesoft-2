@@ -58,11 +58,16 @@ export default async function EntryDetailPage({ params }: EntryDetailPageProps) 
           <p className="text-sm text-subtle">{formatPublishedDate(entry.published_at)}</p>
           <h1 className="ds-headline mt-2 text-4xl text-foreground">{entry.title}</h1>
 
-          <div className="mt-6 rounded-2xl border border-accent/30 bg-accent/10 px-5 py-4">
+          <Link
+            href={`/user/${entry.author.id}`}
+            className="group mt-6 block rounded-2xl border border-accent/30 bg-accent/10 px-5 py-4 transition hover:border-accent/60 hover:bg-accent/15"
+          >
             <p className="text-sm font-medium text-accent">Autor</p>
-            <p className="mt-1 text-lg font-semibold text-foreground">{entry.author.full_name}</p>
+            <p className="mt-1 text-lg font-semibold text-foreground group-hover:underline">
+              {entry.author.full_name}
+            </p>
             <p className="text-sm text-muted">{affiliation}</p>
-          </div>
+          </Link>
 
           <MarkdownView
             content={entry.body}

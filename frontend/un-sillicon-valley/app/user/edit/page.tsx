@@ -1,18 +1,20 @@
-import { Header } from "@/components/layout/Header";
-import { EditProfileForm } from "@/components/user/EditProfileForm";
 import { AuthGuard } from "@/components/auth/AuthGuard";
+import { Header } from "@/components/layout/Header";
+import { AccountSidebar } from "@/components/user/AccountSidebar";
+import { EditProfileForm } from "@/components/user/EditProfileForm";
 
 export default function EditProfilePage() {
   return (
-      <div>
-        <Header />
-        <main className="mx-auto max-w-2xl px-6 py-10">
-          <AuthGuard redirectTo="/login?next=/user/edit">
-          <div className="ds-card p-8">
+    <div>
+      <Header />
+      <AuthGuard redirectTo="/login?next=/user/edit">
+        <div className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-10 lg:flex-row lg:gap-10">
+          <AccountSidebar active="edit" />
+          <main className="min-w-0 flex-1">
             <EditProfileForm />
-          </div>
-          </AuthGuard>
-        </main>
-      </div>
+          </main>
+        </div>
+      </AuthGuard>
+    </div>
   );
 }

@@ -1,12 +1,8 @@
 "use client";
 
-import type { RemixiconComponentType } from "@remixicon/react";
-import {
-  Icon,
-  RiArticleLine,
-  RiChat3Line,
-} from "@/components/icons";
+import { Icon, RiArticleLine, RiChat3Line } from "@/components/icons";
 import { Logo } from "@/components/layout/Logo";
+import type { RemixiconComponentType } from "@remixicon/react";
 
 export type View = "entries" | "comments";
 
@@ -40,6 +36,10 @@ export function Sidebar({
         <Logo showWordmark={false} size="lg" />
       </div>
 
+      <p className="mb-3 px-1 text-xs font-semibold uppercase tracking-widest text-subtle">
+        Moderación
+      </p>
+
       <nav className="flex flex-col gap-2">
         {links.map((link) => {
           const isActive = activeView === link.key;
@@ -47,6 +47,7 @@ export function Sidebar({
           return (
             <button
               key={link.key}
+              type="button"
               onClick={() => onChangeView(link.key)}
               className={`flex items-center gap-3 rounded-xl border p-3 text-left text-sm transition-colors ${
                 isActive
